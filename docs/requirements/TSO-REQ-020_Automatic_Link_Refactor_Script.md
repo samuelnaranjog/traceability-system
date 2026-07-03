@@ -60,12 +60,6 @@ Description: A script that updates the links of code files trigger by a commit
 > - [x] Based on the area add a emoji with semantic meaning
 > 
 
-> [!todo] **Scenario:** Handling hand written links that survive in the connection table like prototypes to figma or others
-> `Precondition - Action - Outcome`
-> 
-> **Given** .... , **When** .... , **Then**
-> 
-
 > [!todo] **Scenario:** Main execution thread updates artifact connections successfully.
 > `Precondition - Action - Outcome`
 > 
@@ -78,6 +72,17 @@ Description: A script that updates the links of code files trigger by a commit
 > 3. Generate a Markdown table containing the classified connections.
 >     
 > 4. Inject or update this table within the specific artifact Markdown file without altering the surrounding content.
+
+> [!todo] **Scenario:** Handling hand written links that survive in the connection table like prototypes to figma or others
+> `Precondition - Action - Outcome`
+> 
+> **Given** .... , **When** .... , **Then**
+> 
+
+> [!todo] **Scenario:** Self healing global project script
+> `Precondition - Action - Outcome`
+> 
+> **Given** .... , **When** .... , **Then** It can be run manually from all the project or trigger by the pre-commit hook
 
 ## Analytical Breakdown
 

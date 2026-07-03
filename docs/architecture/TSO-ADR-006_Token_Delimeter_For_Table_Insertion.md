@@ -1,5 +1,5 @@
 ---
-State: In Process
+State: Pending
 Project:
 Priority:
 Description:

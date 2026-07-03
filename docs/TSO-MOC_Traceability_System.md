@@ -9,6 +9,7 @@ Prototypes:
 Production:
 ---
 # **Traceability System**
+Update to have the auto refactor script
 ## **🏛️ System Architecture**
 ```mermaid
 graph LR

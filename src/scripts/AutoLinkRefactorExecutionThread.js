@@ -63,7 +63,7 @@ const artifactRelatedToFiles = {};
 
 /** @type {import("./TraceabilityPipeline.js").innerItem} */
 /** @type {import("./TraceabilityPipeline.js").DirectoryAndFileMap} */
-
+ 
 const dirsAndFileMap = {
     files: [],
     dirs: [],
