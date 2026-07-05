@@ -19,7 +19,7 @@ tags:
 > - [ ] Check the config file is found and the config parameters are provided if not ask to do so.
 > - [ ] !Check if the folder with the prefix of the project is created (could check if that folder has been added to the config file)
 
-- [ ] check if the worktrees have as root the prefix folder - if the current running one does not it might be a show an inconsistency, 
+- [x] check if the worktrees have as root the prefix folder - if the current running one does not it might be a show an inconsistency, 
 - [ ] check if the main tree has a parent folder with the prefix( use: git rev-parse --show-toplevel to find the parent) - if yes then it should check the parent being that for the other trees if not move them there.
 Note: At this point the trees must be all in the prefix folder, then the creation logic can be executed
 - [ ] ask for the prefix if not created in the config
