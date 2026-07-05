@@ -12,7 +12,6 @@ import {GitWorkflowOperations as gw }  from "./GitWorflowOperations"
 */ 
 
 const prefix = config.prefix // TEMP: set right var
-const prefixDirPath =  config.prefixPath // TEMP: set right var
 
 const isParentPrex = gw.isParentPrefix(prefix) // TEMP: Add the real prefix as argument
 if(isParentPrex == false){
@@ -22,10 +21,13 @@ if(isParentPrex == false){
 
     // Check all the trees and move them to the to the prex folder if they are not in there
     if(isMainPrex == true);
-        gw.moveTreesToParent(prefix, prefixDirPath)
+        const prexDirPath = gw.findMainWorkTreePath()
+        gw.moveTreesToParent(prefix, prexDirPath)
     // Create the main folder and move trees there
     else{ 
         const newPrexDirPath = gw.createPrefixFolder()
-
+        gw.moveTreesToParent(prefix, newPrexDirPath)
     }
 }
+
+// Handle new tree creation

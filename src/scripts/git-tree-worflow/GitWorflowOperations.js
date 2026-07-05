@@ -19,17 +19,20 @@ import { spawn } from "node:child_process";
 
 export default class GitWorkflowOperations{
     /**
+     * @description 1 argument: checks the existence of a specified prefix parent dir for the tree from the cli script was launched
+     * @description 2 arguments: checks the existence of a specified prefix parent dir for the tree from the custom path specifed
      * @param {gitWorkTreeScriptConfig.projectPrefix} prefix
      * @param {path} customPath - The path where you want to figure out if the parent dir is the prefix
      * @returns {Boolean} - True if parent with prefix exist. False whe it does not
      */
     static isParentPrefix (prefix, customPath){
-        // Action: checks if the parent is the prefix
+        
+        
 
         try{
-        // Get the current worktree path 
+        // 1. Get the current worktree path 
 
-        // Logic Gate: Script runnin dir and custom path
+        // Logic Gate: Script running dir or custom path
         if(!customPath){
         const currentDirectory = execSync('git rev-parse --show-toplevel', {
             encoding: 'utf8',
@@ -49,7 +52,7 @@ export default class GitWorkflowOperations{
             throw new Error('Git command returned an empty path.');
         }
 
-        // Get the parent path of the worktree 
+        // 2.  Get the parent path of the worktree 
         const parentPath = dirname(currentDirectory);
         console.log(`Parent absolute path: ${parentPath}`);
 
@@ -58,9 +61,10 @@ export default class GitWorkflowOperations{
             // console.error(error.message); // Uncomment to debug the exact Git failure
         }
 
-        // Parent name
+        // 3. Figure out the parent name
         const parentFolderName = basename(parentPath);
 
+        //4. Compare to the prefix and define if is prefix or not
         if(parentFolderName == prefix){
             return true;
         }
@@ -81,36 +85,16 @@ export default class GitWorkflowOperations{
 
         /** 
          * 1. Create the prefix folder:
-         * - Get the main tree path
          * - Find the parent of the Main tree
          * - Create the folder with its prefix
          */ 
 
 
-        //1.1 Finding the parent by using worktree listing
-        const git = spawn('git', ['list worktree'])// takes command and flags
+        // Finding the parent
+        
+        const mainBranchParentFolderPath = this.findMainWorkTreePathParent();
 
-        const gitOutput = readline.createInterface({ input: git.stdout }); 
-        /**
-         * Git outputs  in each line the next format: path, hash, branch name
-         * Example: 
-         * "/Users/s_n_gr/Documents/My-Engineering-projects/traceability_system  17d7551 [main]
-         *  /Users/s_n_gr/Documents/My-Engineering-projects/tso/req023           17d7551 [req023]"
-         */
-
-        let mainBranchPath = '';
-        gitOutput.forEach(line => {
-            const lineParts = line.split(/\s+/) // Split the line in white spaces
-
-            //find main path
-            if(lineParts[2] == "main"){
-                mainBranchPath = lineParts[0];
-            }
-        })
-
-        const mainBranchParentFolderPath = dirname(mainBranchPath);
-
-        //1.2 Create the folder
+        //Create the folder
         const newPrefixDir = path.join(mainBranchParentFolderPath, prefix);
         try{
             await mkdir(newPrefixDir);
@@ -127,7 +111,8 @@ export default class GitWorkflowOperations{
     }
 
     /**
-     * @returns {path} Main work-tree path
+     * Run from a valid worktree to work properly
+     * @returns {path} Main work-tree absolute path
      */
     static findMainWorkTreePath(){
 
@@ -158,15 +143,58 @@ export default class GitWorkflowOperations{
 
     }
 
+    /**
+     * Runs from a valid worktree to work properly
+     * @returns {path} The absolute path of the parent folder of the main branch and principal worktree
+     */
+
+      static findMainWorkTreePathParent(){
+        // NOTE: this should be run form one of the worktrees that the precondition or its nested folders
+
+        //1. Worktree listing
+        const git = spawn('git', ['worktree', 'list'])// takes command and flags
+
+        const gitOutput = readline.createInterface({ input: git.stdout }); 
+        /**
+         * Git outputs  in each line the next format: path, hash, branch name
+         * Example: 
+         * "/Users/s_n_gr/Documents/My-Engineering-projects/traceability_system  17d7551 [main]
+         *  /Users/s_n_gr/Documents/My-Engineering-projects/tso/req023           17d7551 [req023]"
+         */
+
+        // 2. Find main tree path
+        let mainTreePath = '';
+        gitOutput.forEach(line => {
+            const lineParts = line.split(/\s+/) // Split the line in white spaces
+
+            //find main path
+            if(lineParts[2] == "main"){
+                mainTreePath = lineParts[0];
+            }
+        })
+
+        // 3. Find and return parent folder path
+        const mainBranchParentFolderPath = dirname(mainTreePath);
+
+        return mainBranchParentFolderPath
+      }
+
+    /**
+     * Move the worktrees to the prefix folder when they are not there
+     * @param {prefix} prefix 
+     * @param {path} prefixDirPath - The absolute path to the parent folder for the current working worktrees to move trees there
+     */
+
     static moveTreesToParent(prefix, prefixDirPath){
         /**
-         * Scan all wortrees and make an array of paths
-         * check each path parent 
-         * handle the bool answer:
+         * - Scan all wortrees and populate the set with paths
+         * - check each path parent 
+         * - handle the bool answer:
          *      * true: is okey let it there
          *      * false: move the tree to the prefix folder
          */
 
+        // 1. Scan all worktrees and append to the set
         //Worktree listing for tree path collection
         const git = spawn('git', ['list worktree'])// takes command and flags
 
@@ -185,13 +213,13 @@ export default class GitWorkflowOperations{
             const lineParts = line.split(/\s+/) // Split the line in white spaces
 
             //Append the path
-            if(lineParts[0])
+            if(lineParts[0]){
                 workTreePaths.add(lineParts[0]);
             }
             else{
                 throw new Error('Work-tree path not found');
             }
-        )
+        })
         }
         catch(error){
             console.error('❌ fail to collect tree paths', error.message)

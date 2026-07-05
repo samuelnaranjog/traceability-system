@@ -19,18 +19,22 @@ tags:
 > - [ ] Check the config file is found and the config parameters are provided if not ask to do so.
 > - [ ] !Check if the folder with the prefix of the project is created (could check if that folder has been added to the config file)
 
+**Functionality 1:** Prefix folder set up
 - [x] check if the worktrees have as root the prefix folder - if the current running one does not it might be a show an inconsistency, 
-- [ ] check if the main tree has a parent folder with the prefix( use: git rev-parse --show-toplevel to find the parent) - if yes then it should check the parent being that for the other trees if not move them there.
+- [x] check if the main tree has a parent folder with the prefix( use: git rev-parse --show-toplevel to find the parent) - if yes then it should check the parent being that for the other trees if not move them there.
 Note: At this point the trees must be all in the prefix folder, then the creation logic can be executed
 - [ ] ask for the prefix if not created in the config
 - [ ] ask for the obsidian path if running symlink script version and the symlink is not present in the config
-> **Functionality 2**
+<!--
+> **Functionality **
+>
 > - [ ] If not Create a folder in the config and not prefix path with the prefix of the project  
-> - [ ] Move the project folder to the prefix folder
+>- [ ] Move the project folder to the prefix folder
+> -->
 > **Functionality 4**
 > - [ ] Create a new tree on the prefix identifier folder
 > - [ ] figure out the relative path to the worktree folder that contains all branches
-> - [ ] use new worktree
+> - [ ] use new worktree by programatically if command as to do so **open editor instance**
 > **Functionality 5**
 > - [ ] Get from the config file the folder of the markdown editor for this project and update the symlink connection that should point to main by unlink it
 > - [ ] !Check also that there are only one symlink if not ask the builder to resolve manually the conflict (use readdir and filter)
