@@ -1,7 +1,7 @@
 // Project Root path
 import appRoot from "app-root-path";
 import { basename, dirname, path } from "node:path";
-import { mkdir, rename } from "node:fs";
+import { mkdir, readdir, rename, symlink, unlink } from "node:fs";
 import { cwd } from "node:process";
 import { spawn } from "node:child_process";
 
@@ -80,7 +80,7 @@ export default class GitWorkflowOperations{
      * @returns {path} - Path to the prefix directory
      * 
     */
-    static createPrefixFolder(prefix, workTreeConfig ){
+    static createPrefixFolder(prefix){
         //Consider this is run from the main tree folder
 
         /** 
@@ -242,4 +242,79 @@ export default class GitWorkflowOperations{
             }
         }
     }
+    /**
+     * 
+     * @param {path} absolutePrefixPath - Must be the path of the prefix folder
+     * @param {string} artifactName - Lower case artifact prefix and identifier num
+     * @returns {path} Absolute path of the new tree dir
+     */
+    static createWorkTree(absolutePrefixPath, artifactName){
+
+        try{
+            const workTreePath = path.join(absolutePrefixPath, artifactName)
+            execSync(`git worktree add ${workTreePath} ${artifactName}`, {
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'ignore'] // Prevents git errors from leaking to console if run outside a repo
+            })
+        }
+        catch(err){
+            console.error(`❌ Fail to create the new worktree: ${workTreePath}`, err.message)
+            process.exit(1);
+        }            
+
+            console.log('New worktree successfully created at:', workTreePath ); // Uncoment for success message
+            return workTreePath;
+    }
+
+    /**
+     * 
+     * @param {path} editorProjectFolder - Path to the folder that should contain the symlink connection to the worktree
+     * @param {path} workTreePath - Path to the worktree that should be linked to the markdown editor
+     */
+    static updateSymlink(editorProjectFolder, workTreePath){
+
+        /** 
+         * 1. Detach the symlink in the folder:
+         * - Handle the edge case where multiple symlink are present in the markdwon editor
+         * - Unlink the symlink present
+         * 
+        */ 
+        try{
+            const symlinksListing = await readdir(editorProjectFolder, { withFileTypes: true })
+            const symlinkFiltered = symlinksListing.filter(entry => entry.isSymbolicLink()) // Build an array of only symlinks
+            const symlinkCount =symlinkFiltered.length; // Find the number of symlinks in the editor folder
+
+            //Handeling multiple symlink conflict
+            if(symlinkCount > 1){
+                throw new Error (`Your markdown editor dir: ${editorProjectFolder} should only contain one symlink, manually fix the conflict`)
+            }
+
+            const currentSymlinkPath = path.join(symlinkFiltered[0].path,symlinkFiltered[0].name )
+            // unlink the present symlink
+            unlink(currentSymlinkPath);
+        }
+        catch(err){
+            console.error(`❌ Fail to detach the symlink `, err.message)
+            process.exit(1);
+        }
+        
+
+        /**
+         * 2. Create the new symlink
+         */
+
+        try{
+            const docsTreePath = path.join(workTreePath, 'docs')
+            const docsEditorPath = path.join(editorProjectFolder, 'docs')// the new folder docs that will have the symlink
+            symlink(docsTreePath, editorProjectFolder)
+        }
+        catch(err){
+            console.error(`❌ Fail to create the new symlink connection for the tree: ${workTreePath}`, err.message)
+            process.exit(1);
+        }
+        
+    }
+
+    //static validateConfigPresence
+    //static updateConfig()
 }
