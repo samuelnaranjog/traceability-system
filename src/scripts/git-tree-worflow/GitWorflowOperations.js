@@ -1,8 +1,8 @@
 // Project Root path
 import appRoot from "app-root-path";
-import { basename, dirname, path } from "node:path";
+import { basename, dirname, parse, path } from "node:path";
 import { mkdir, readdir, rename, symlink, unlink } from "node:fs";
-import { cwd } from "node:process";
+import { config, cwd } from "node:process";
 import { spawn } from "node:child_process";
 
 /**
@@ -18,6 +18,30 @@ import { spawn } from "node:child_process";
  */
 
 export default class GitWorkflowOperations{
+
+    /** 
+     *  @description Find the current worktree dir path
+     *  @returns {path} The path of the worktree were the command was launched
+    */
+    static findWorktreePath(){
+
+        try {
+            const currentDirectory = execSync('git rev-parse --show-toplevel', {
+                encoding: 'utf8',
+                stdio: ['ignore', 'pipe', 'ignore'] // Prevents git errors from leaking to console if run outside a repo
+            }).trim();
+
+            if (!currentDirectory) {
+                throw new Error('Git command returned an empty path.');
+            }
+
+            return currentDirectory;
+        }
+        catch (error) {
+            console.error('❌ The current cli open folder is not part of a valid worktree.', error.message);
+            // console.error(error.message); // Uncomment to debug the exact Git failure
+        }
+    }
     /**
      * @description 1 argument: checks the existence of a specified prefix parent dir for the tree from the cli script was launched
      * @description 2 arguments: checks the existence of a specified prefix parent dir for the tree from the custom path specifed
@@ -25,6 +49,8 @@ export default class GitWorkflowOperations{
      * @param {path} customPath - The path where you want to figure out if the parent dir is the prefix
      * @returns {Boolean} - True if parent with prefix exist. False whe it does not
      */
+
+    
     static isParentPrefix (prefix, customPath){
         
         
@@ -314,7 +340,150 @@ export default class GitWorkflowOperations{
         }
         
     }
+    static launchVSCode(targetPath) {
+        const absolutePath = path.resolve(targetPath);
+        let command;
+        let args;
 
-    //static validateConfigPresence
+        // Define the exact binary and arguments per OS
+        if (process.platform === 'win32') {
+            command = 'cmd.exe';
+            args = ['/c', 'code', absolutePath];
+        } else if (process.platform === 'darwin') {
+            command = 'open';
+            args = ['-a', 'Visual Studio Code', absolutePath];
+        } else {
+            command = 'code';
+            args = [absolutePath];
+        }
+
+        // Spawn the process 
+        const child = spawn(command, args, {
+            detached: true,
+            stdio: 'ignore' // Ignore standard input/output so Node doesn't wait for it
+        });
+
+        //Handle errors in process gracefully
+        child.on('error', (err) => {
+             console.error(`❌ Fail to start VS Code. Error: ${err.message}`);
+   
+        });
+
+        // Unreference the child process so Node can exit while VS Code stays open
+        child.unref();
+
+        console.log(`Launched VS Code for: ${absolutePath}`);
+
+    }
+    
+    /**
+     * @param {string} configName - Config file name
+     */
+    static validateConfigPresence(configName){
+        const worktreeFolder = this.findWorktreePath()
+        const items = readdir(worktreeFolder, {withFileTypes: true});
+        const files = items.filter(item => item.isFile())
+
+    
+        let path = undefined;
+        let hasConfig;
+        const configFile = files.find(file => {file.name == configName})
+        
+        if(configFile){
+            hasConfig = true
+            path = path.join(configFile.path, configFile.name)
+        }
+        else {
+            hasConfig = false;
+        }
+
+        return [hasConfig, path];
+    }
+
+    /**
+     * @Description Creates a config file in the worktree folder, of course only if run from a valid worktree or worktree subfolder 
+     * @param {string} configName - Config file name
+     * @returns {path} Path to the created config file
+     */
+    static createConfigFile(configName){
+        const worktreePath = this.findWorktreePath()
+        const newFilePath = path.join(worktreePath, configName)
+        
+        try{
+        fs.writeFileSync(newFilePath, '')
+        console.log('File created successfully!');
+        retur
+        } catch (err) {
+            console.error('Failed to create file:', err);
+        }
+    }
+    /**
+     * @description When the property does not exist or is empty this method will ask the user to fill it, when it does have data then it will simply let the property untouched
+     * @param {*} property 
+     * @param {*} absolutePath 
+     * @returns 
+     */
+    static setUpPropertiesOfConfig(property, absolutePath){
+        // Check if property in file contains data
+        try {
+            const configData  = fs.readFile(absolutePath, 'utf8');
+        } catch (error) {
+             console.error(`Fail to access the config file ${absolutePath}`, error)
+        }
+        
+        let configJSON;
+        try{
+            configJSON = JSON.parse(configData);
+        } catch (err){
+                console.error('Fail to parse the config data')
+        }
+
+        const jsonProp = configJSON.gitWorkTreeScriptConfig[property]
+        if (!jsonProp || jsonProp == '') {
+
+            const rl = readline.createInterface({ input, output });
+
+            try {
+                // This pauses execution until the user hits 'Enter'
+                const answer = await rl.question(`What is you project ${property}`);
+
+                jsonProp = answer // Add the new property data to the json config object
+
+                // Write the config with the new data
+                fs.writeFileSync(absolutePath, configJSON);
+
+                //console.log(`Added to the config file ${answer}`); //Uncoment to debug
+
+            } catch(err){
+                console.error(`❌ Fail to set up the config property  ${err.message}`);
+            } 
+            finally {
+                rl.close(); // Crucial to prevent your script from hanging open
+            }
+        }
+        else{
+            return;
+        }
+
+    }
+
+    static accessPropertiesOfConfig(property, absolutePath){
+        try {
+            const configData  = fs.readFile(absolutePath, 'utf8');
+        } catch (error) {
+             console.error(`Fail to access the config file ${absolutePath}`, error)
+        }
+
+        let configJSON;
+        try{
+            configJSON = JSON.parse(configData);
+        } catch (err){
+                console.error('Fail to parse the config data')
+        }
+
+        const jsonProp = configJSON.gitWorkTreeScriptConfig[property]
+        return jsonProp;
+    }
+
     //static updateConfig()
 }
