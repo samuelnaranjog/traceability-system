@@ -2,7 +2,7 @@
 import appRoot from "app-root-path";
 import { basename, dirname, parse} from "node:path";
 import path from 'path'
-import { mkdir, readdir, rename, symlink, unlink } from "node:fs";
+import { mkdirSync, readdir, renameSync, symlink, unlink } from "node:fs";
 import { config, cwd } from "node:process";
 import { spawn, execSync, spawnSync } from "node:child_process";
 import * as readline from "node:readline/promises";
@@ -123,23 +123,26 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
          */ 
 
 
-        // Finding the parent
         
-        const mainBranchParentFolderPath = this.findMainWorkTreePathParent(customPath);
-
-        //Create the folder
-        const newPrefixDir = path.join(mainBranchParentFolderPath, prefix);
         try{
-            mkdir(newPrefixDir);
+            // Finding the parent
+        
+            const mainBranchParentFolderPath = this.findMainWorkTreePathParent(customPath);
 
+            //Create the folder
+            const newPrefixDir = path.join(mainBranchParentFolderPath, prefix);
+            console.log(`DEBUG: New path for the prefix folder : ${newPrefixDir}`); // uncoment to debug
+            
+            mkdirSync(newPrefixDir);
             console.log(`Successfully created: ${newPrefixDir}`);
+            return newPrefixDir;
         }
         catch(error){
             console.error('The prefix folder creation failed', error.message)
             process.exit(1);
         }
 
-        return newPrefixDir;
+        
 
     }
 
@@ -160,7 +163,7 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
             return null;
         }
         
-        const gitOutputlines = result.stdout.toString('utf8').trim().split('\n');;
+        const gitOutputlines = result.stdout.toString('utf8').trim().split('\n');
 
         /**
          * Git outputs  in each line the next format: path, hash, branch name
@@ -211,7 +214,7 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
      * @returns {path} The absolute path of the parent folder of the main branch and principal worktree
      */
 
-      static findMainWorkTreePathParent(customPath = process.cwd()){
+    static findMainWorkTreePathParent(customPath = process.cwd()) {
         // NOTE: this should be run form one of the worktrees that the precondition or its nested folders
 
         const mainTreePath = this.findMainWorkTreePath(customPath)
@@ -220,7 +223,7 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
         const mainBranchParentFolderPath = dirname(mainTreePath);
 
         return mainBranchParentFolderPath
-      }
+    }
 
     /**
      * Move the worktrees to the prefix folder when they are not there
@@ -228,7 +231,7 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
      * @param {path} prefixDirPath - The absolute path to the parent folder for the current working worktrees to move trees there
      */
 
-    static moveTreesToParent(prefix, prefixDirPath, customPath){
+    static moveTreesToParent(prefix, prefixDirPath, customPath) {
         /**
          * - Scan all wortrees and populate the set with paths
          * - check each path parent 
@@ -237,57 +240,119 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
          *      * false: move the tree to the prefix folder
          */
 
+
         const workTreePaths = new Set();
 
-        try{
-        // 1. Scan all worktrees and append to the set
-        //Worktree listing for tree path collection
-        const git = spawn('git', ['worktree', 'list'],{ cwd: customPath})// takes command and flags
+        try {
 
-        const gitOutput = readline.createInterface({ input: git.stdout }); 
-        /**
-         * Git outputs  in each line the next format: path, hash, branch name
-         * Example: 
-         * "/Users/s_n_gr/Documents/My-Engineering-projects/traceability_system  17d7551 [main]
-         *  /Users/s_n_gr/Documents/My-Engineering-projects/tso/req023           17d7551 [req023]"
-         */
 
-            gitOutput.on('line', (line) => {
-            const lineParts = line.split(/\s+/) // Split the line in white spaces
+            // 1. Scan all worktrees and append to the set
+            //Worktree listing for tree path collection
+            const result = spawnSync('git', ['worktree', 'list'], { cwd: customPath, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })// takes command and flags
 
-            console.log(`DEBUG: New array of worktree list: ${lineParts}`); // Uncoment to debug
-            //Append the path
-            if(lineParts[0]){
-
-                workTreePaths.add(lineParts[0]);
-                console.log(`DEBUG: Adding new tree path: ${lineParts[0]}`); // Uncoment to debug
+            if (!result || result.status !== 0 || !result.stdout) {
+                throw new Error('Did not found any worktree or an error occur at workTreePaths()');
             }
-            else{
-                throw new Error('Work-tree path not found');
-            }
-        })
+            /**
+             * Git outputs  in each line the next format: path, hash, branch name
+             * Example: 
+             * "/Users/s_n_gr/Documents/My-Engineering-projects/traceability_system  17d7551 [main]
+             *  /Users/s_n_gr/Documents/My-Engineering-projects/tso/req023           17d7551 [req023]"
+             */
+
+            const gitOutputlines = result.stdout.toString('utf8').trim().split('\n');
+
+            console.log(`DEBUG: New array of worktree list: ${gitOutputlines}`); // Uncoment to debug
+
+            gitOutputlines.forEach(line => {
+                const lineParts = line.split(/\s+/);
+                if (lineParts[0]) {
+
+                    workTreePaths.add(lineParts[0]);
+                    console.log(`DEBUG: Adding new tree path: ${lineParts[0]}`); // Uncoment to debug
+                }
+                else {
+                    throw new Error('Corrupted line or changes in git');
+                }
+            })
+
+
         }
-        catch(error){
+        catch (error) {
             console.error('❌ fail to collect tree paths', error.message)
             process.exit(1);
         }
-        
-        // 2. Check each tree parent path and handle the movement
-        /*
-        for (const path of workTreePaths) {
-            const bool = this.isParentPrefix(prefix, path);
-            if (bool == false) {
+
+        // 2. Check each tree parent path that is not main and handle the movement
+
+        //Categorized the trees
+        const linkedPaths = [];
+        let mainAnchorPath = null;
+
+        for (const treePath of workTreePaths) {
+            const mainTree = this.findMainWorkTreePath(treePath);
+            if (treePath === mainTree) {
+                mainAnchorPath = treePath;
+            } else {
+                linkedPaths.push(treePath);
+            }
+        }
+
+        // Handle linked trees first to ensure system health and not loosing the main path reference 
+        for (const treePath of linkedPaths) {
+            const bool = this.isParentPrefix(prefix, treePath);
+            if (bool === false) {
                 try {
-                    rename(path, prefixDirPath)
-                    console.log(`Successfully move dir ${path} to the dir ${prefixDirPath} `);
-                }
-                catch (error) {
-                    console.error(`Failed to move the main branch at: ${mainBranchPath} to  dir ${newPrefixDir}`, error.message)
-                    process.exit(1);
+                    const folderName = path.basename(treePath);
+                    const targetPath = path.join(prefixDirPath, folderName);
+
+                    const moveResult = spawnSync('git', ['worktree', 'move', treePath, targetPath], {
+                        cwd: treePath,
+                        encoding: 'utf8',
+                        stdio: ['ignore', 'pipe', 'pipe']
+                    });
+
+                    if (moveResult.status !== 0) {
+                        throw new Error(`Git move failed for linked branch: ${moveResult.stderr}`);
+                    }
+                    console.log(`[GIT MOVE] Successfully moved LINKED branch: ${treePath} -> ${targetPath}`);
+                } catch (error) {
+                    console.error(`❌ Failed to move linked worktree: ${treePath}`, error.message);
+                    throw error;
                 }
             }
         }
-        */
+
+        // Hard movement of the main wortree
+        if (mainAnchorPath) {
+            const bool = this.isParentPrefix(prefix, mainAnchorPath);
+            if (bool === false) {
+                try {
+                    const folderName = path.basename(mainAnchorPath);
+                    const targetPath = path.join(prefixDirPath, folderName);
+
+                    // Move via OS
+                    renameSync(mainAnchorPath, targetPath);
+                    console.log(`[OS MOVE] Successfully moved MAIN anchor: ${mainAnchorPath} -> ${targetPath}`);
+
+                    // Phase 4: THE REPAIR (Critical step to reconnect the topography)
+                    const repairResult = spawnSync('git', ['worktree', 'repair'], {
+                        cwd: targetPath, // Must run inside the NEW main anchor location
+                        encoding: 'utf8',
+                        stdio: ['ignore', 'pipe', 'pipe']
+                    });
+
+                    if (repairResult.status !== 0) {
+                        console.warn(`[WARN] Git repair threw a warning: ${repairResult.stderr}`);
+                    } else {
+                        console.log(`[GIT REPAIR] Worktree structural links re-established successfully.`);
+                    }
+                } catch (error) {
+                    console.error(`❌ Failed to move main anchor: ${mainAnchorPath}`, error.message);
+                    throw error;
+                }
+            }
+        }
     }
     /**
      * 

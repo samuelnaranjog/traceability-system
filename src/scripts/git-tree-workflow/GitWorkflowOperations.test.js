@@ -31,6 +31,20 @@ describe('Intial testing of the setup', () => {
         execSync('git add . && git commit -m "chore: intial commit"', { cwd: mainRepoPath, stdio: 'ignore' });
         execSync('git branch -M main', { cwd: mainRepoPath });
 
+        // ==========================================
+        // INJECTED LINKED WORKTREE SETUP
+        // ==========================================
+        
+        
+        // 1. Define paths parallel to the 'main' directory inside the sandbox
+        const req023Path = path.join(sandboxRoot, 'req023');
+        const featureXPath = path.join(sandboxRoot, 'feature-x');
+
+        // 2. Execute Git's native worktree add command from the main repo
+        // Syntax: git worktree add <absolute-path> -b <new-branch-name>
+        execSync(`git worktree add "${req023Path}" -b req023`, { cwd: mainRepoPath, stdio: 'ignore' });
+        execSync(`git worktree add "${featureXPath}" -b feature-x`, { cwd: mainRepoPath, stdio: 'ignore' });
+
     })
 
     afterAll(() => {
@@ -47,12 +61,29 @@ describe('Intial testing of the setup', () => {
     // This should execute cleanly without ENOENT because folderSetUp hasn't touched it yet
 });
 
-    test('Engine Set Up: Folder with prefix is created and worktrees moved', () => {
-    // 2. Now alter the state
+    test('Engine Set Up: Folder with prefix is created, main worktree and linked wortrees moved', () => {
+    // Alter the state
     folderSetUp(expectedPrefix, mainRepoPath);
 
-    // 3. Force environment inheritance when passing configurations
-    const isParentPrexAfter = GWO.isParentPrefix(expectedPrefix, mainRepoPath);
-    expect(isParentPrexAfter).toBeDefined();
+    // New expected paths
+    const newMainPath = path.join(wtParentDirectory, 'main');
+    const newReqPath = path.join(wtParentDirectory, 'req023');
+    const newFeatPath = path.join(wtParentDirectory, 'feature-x');
+
+
+    // Main achor Assertion
+    const isParentPrexAfter = GWO.isParentPrefix(expectedPrefix, newMainPath);
+
+    expect(dirname(newMainPath)).toBe(wtParentDirectory);
+    expect(isParentPrexAfter).toBe(true);
+
+    // Linked trees assertion
+    expect(dirname(newReqPath)).toBe(wtParentDirectory);
+    expect(dirname(newFeatPath)).toBe(wtParentDirectory);
+        
+    // Final check to ensure the OS actually sees the new files
+    expect(fs.existsSync(newReqPath)).toBe(true);
+    expect(fs.existsSync(newFeatPath)).toBe(true);
 });
+
 })

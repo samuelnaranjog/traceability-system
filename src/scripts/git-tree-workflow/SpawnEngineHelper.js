@@ -30,13 +30,13 @@ export function folderSetUp(prefix, cwd = process.cwd()){
             if (isMainPrex == true) {
                 
                 prexDirPath = GWO.findMainWorkTreePathParent();
-                GWO.moveTreesToParent(prefix, prexDirPath)
+                GWO.moveTreesToParent(prefix, prexDirPath, cwd)
                 
             }
             else {
                 // Create the prefix folder relative to the main tree and move trees there
                 prexDirPath = GWO.createPrefixFolder(prefix, cwd);
-                GWO.moveTreesToParent(prefix, prexDirPath);
+                GWO.moveTreesToParent(prefix, prexDirPath, cwd);
             }
         }
 

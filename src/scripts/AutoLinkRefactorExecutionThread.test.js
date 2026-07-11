@@ -1,4 +1,4 @@
-import runTraceabilityPipeline from "./AutoLinkRefactorExecutionThread"
+import runTraceabilityPipeline from "./AutoLinkRefactorExecutionThread.js"
 
 import fs from 'fs';
 import path from 'path';
