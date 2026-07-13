@@ -1,7 +1,7 @@
 // @trace REQ-023 ADR-008 @
 
-import {createWorkTree, updateSymlink, launchVSCode, validateConfigPresence, createConfigFile, setUpPropertiesOfConfig, accessPropertiesOfConfig}  from "./GitWorkflowOperations"
-import { folderSetUp } from "./SpawnEngineHelper"
+import GWO from "./GitWorkflowOperations.js"
+import { folderSetUp } from "./SpawnEngineHelper.js"
 import { parseArgs} from 'node:util'
 
 // Worktree within correct folder
@@ -11,17 +11,20 @@ import { parseArgs} from 'node:util'
 const configName = "system-config.json"
 // Check config file presence
 //TODO....
+let isConfig;
+let configPath;
 
-let [isConfig, configPath] = validateConfigPresence(configName)
+    [isConfig, configPath] = GWO.validateConfigPresence(configName);
 
 if(!isConfig){
-    createConfigFile(configName);
-    [isConfig, configPath] = validateConfigPresence(configName)
-    setUpPropertiesOfConfig("projectPrefix", configPath)
+    configPath = GWO.createConfigFile(configName);
+    //[isConfig, configPath] = GWO.validateConfigPresence(configName)
+    console.log(`DEBUG: Created config file path: ${configPath}`)//uncoment to debug
+    GWO.setUpPropertiesOfConfig("projectPrefix", configPath)
 }
 else{
-    // Valºidate the prefix is exist & if not add the data
-    setUpPropertiesOfConfig("projectPrefix", configPath)
+    // Validate the prefix is exist & if not add the data
+    GWO.setUpPropertiesOfConfig("projectPrefix", configPath)
 }
 
 /** Commmand Arguments Management:
@@ -33,7 +36,6 @@ const options = {
     // Key represents the long flag (--count) // 'short' property represents the alias flag (-c)
     symlink: {type: "boolean", short: "s"},
     code: {type: "boolean", short: "c"},
-    allowPositionals: true // Allows non-flag stringsª
 }
 
 const cliData = parseArgs({args: process.argv.slice(2), options, allowPositionals: true})
@@ -42,6 +44,7 @@ const {positionals} = cliData;
 
 /** @type {string} - The artifact prefix and the number id in lowercase e.g: req025, adr001, vs009 */
 const artifactArg = positionals[0];
+
 
 /**
  * Configuration data validation:
@@ -56,7 +59,7 @@ const artifactArg = positionals[0];
 
 
 // Set Up: Data for engine operation
-const prefix = config.prefix // TEMP: set right var
+const prefix = GWO.accessPropertiesOfConfig('projectPrefix', configPath); // TEMP: set right var
 let wormHoleStart; // TEMP: Abosulte path for the editor markdwon project folder
 
 // Set Up: Setting up the prefix folder and checking all is fine 
@@ -71,16 +74,16 @@ if (values.symlink) {
     
 
     //Handle missing editor path in the config
-    setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
+    GWO.setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
     
     //Access symlink path in its most updated state
-    wormHoleStart = accessPropertiesOfConfig('markdownEditorFolderPath', configPath)
+    wormHoleStart = GWO.accessPropertiesOfConfig('markdownEditorFolderPath', configPath)
 
     // 1. Handle new tree creation:
-    const wormHoleEnd = createWorkTree(prefixDirPath, artifactArg); // The new created tree path
+    const wormHoleEnd = GWO.createWorkTree(prefixDirPath, artifactArg); // The new created tree path
 
     // 2. Symlink update
-    updateSymlink(wormHoleStart, wormHoleEnd);
+    GWO.updateSymlink(wormHoleStart, wormHoleEnd);
 }
 
 /**
@@ -90,19 +93,19 @@ if (values.symlink) {
 else if(values.symlink && values.code) {
 
     //Handle missing editor path in the config
-    setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
+    GWO.setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
     
     //Access symlink path in its most updated state
-    wormHoleStart = accessPropertiesOfConfig('markdownEditorFolderPath', configPath)
+    wormHoleStart = GWO.accessPropertiesOfConfig('markdownEditorFolderPath', configPath)
     
     // 1. Handle new tree creation:
-    const worktreePath = createWorkTree(prefixDirPath, artifactArg); // The new created tree path
+    const worktreePath = GWO.createWorkTree(prefixDirPath, artifactArg); // The new created tree path
 
     // 2. Symlink update
-    updateSymlink(wormHoleStart, worktreePath);
+    GW0.updateSymlink(wormHoleStart, worktreePath);
 
     // 3. VsCode instance
-    launchVSCode(worktreePath);
+    GWO.launchVSCode(worktreePath);
 
 }
 /**
@@ -110,10 +113,10 @@ else if(values.symlink && values.code) {
  */
 else if(!values.symlink && values.code){
     // 1. Handle new tree creation:
-    createWorkTree(prefixDirPath, artifactArg); // The new created tree path
+    GWO.createWorkTree(prefixDirPath, artifactArg); // The new created tree path
 
     // 2. VsCode instance
-    launchVSCode(worktreePath);
+    GWO.launchVSCode(worktreePath);
 }
 
 /**
@@ -122,5 +125,5 @@ else if(!values.symlink && values.code){
  */
 else{
     // 1. Handle new tree creation:
-    createWorkTree(prefixDirPath, artifactArg); // The new created tree path
+    GWO.createWorkTree(prefixDirPath, artifactArg); // The new created tree path
 }

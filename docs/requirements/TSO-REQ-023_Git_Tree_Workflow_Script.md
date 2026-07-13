@@ -87,3 +87,46 @@ Description:
 ###### Reference :
 - [[(Literature) How to handle arguments and flags of a script in node js]]
 - [[(Literature) Node js interacting with the CLI for shell tasks]]
+
+```
+# Git Wortree Set Up & Spawn Orchestrator
+I develop the initial part of the system requirement of a workflow orchestrator that interacts with git and the system files to create a frictionless, fast and intuitive experience when bringing ideas to live.
+
+Creating and isolated environment that ensures the change log remains pristine and connected to a specific Requirement artifact and its context and market value.
+
+## Command and flags
+The command that triggers the first part of the orchestrator is `spawn` with a string **argument** that will be the name of the requirement to implement e.g: `req023`. It can be called with different flags to modify the behavior of the orchestrator and achieve different functionalities:
+
+- `--symlink` or `-s`
+- `--code` or `-c`
+
+### Flag Combinations and what it achieves
+
+#### **Scenario A:** Git Tree Workflow & Symlink Connection To The Markdown Editor Update
+Only trigger the command with the `-s` flag:
+1. Creates a folder with the prefix if not previously created and move the main worktree dir and other worktrees present there
+2. Create a new worktree with the artifact in lowercase as name and branch to work within the folder with the project identifier prefix
+3. Connect the `docs` of the new worktree to the folder in the markdown editor
+
+#### **Scenario B:** Git Tree Workflow Intialization enhance functionality for VSCode instance & Symlink Connection To The Markdown Editor Update
+Trigger the command with the `-s` & `-c` flag:
+1. Create a folder with the prefix if not previously created and move the main worktree dir and other worktrees present there
+2. Create a new worktree with the artifact in lowercase as name and branch to work within the folder with the project identifier prefix
+3. Connect the `docs` of the new worktree to the folder in the markdown editor
+4. Open a VS code instance
+
+#### **Scenario C:** Git Tree Workflow Initialization enhance functionality for VSCode instance
+Only trigger the command with the `-c` flag:
+1. Create a folder with the prefix if not previously created and move the main worktree dir and other worktrees present there
+2. Create a new worktree with the artifact in lowercase as name and branch to work within the folder with the project identifier prefix
+3. Open a VS code instance
+
+#### **Scenario D:** Default only worktree creation folder set up
+
+Trigger the command without flags:
+1. Create a folder with the prefix if not previously created and move the main worktree dir and other worktrees present there
+2. Create a new worktree with the artifact in lowercase as name and branch to work within the folder with the project identifier prefix
+
+## Challenges
+To handle the underlying mechanism of git such as the way it manages the links from the main worktree to its linked ones, how to move them without breaking the linkage and how to heal the systme once the main woerktree is moved represent a challenge that involve some hours of debugging, logs, investigation and testing to make it properly set up the initial state of the system and continue with the worktree creation. 
+```

@@ -2,7 +2,7 @@
 import appRoot from "app-root-path";
 import { basename, dirname, parse} from "node:path";
 import path from 'path'
-import { mkdirSync, readdir, renameSync, symlink, unlink } from "node:fs";
+import { mkdirSync, readdir, readdirSync, readFileSync, renameSync, symlink, unlink, writeFileSync } from "node:fs";
 import { config, cwd } from "node:process";
 import { spawn, execSync, spawnSync } from "node:child_process";
 import * as readline from "node:readline/promises";
@@ -175,7 +175,7 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
         console.log(`DEBUG: In FindMainWorktree 'git', ['worktree', 'list'] output is: ${JSON.stringify(gitOutputlines)}` ) // Uncoment to debug
         
 
-        mainLine = gitOutputlines.find(line => line.includes('[main]') || line.includes('(main)'));
+        const mainLine = gitOutputlines.find(line => line.includes('[main]') || line.includes('(main)'));
 
         if(!mainLine){
             return null;
@@ -464,10 +464,11 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
     
     /**
      * @param {string} configName - Config file name
+     * @returns 
      */
     static validateConfigPresence(configName){
         const worktreeFolder = this.findWorktreePath()
-        const items = readdir(worktreeFolder, {withFileTypes: true});
+        const items = readdirSync(worktreeFolder, {withFileTypes: true});
         const files = items.filter(item => item.isFile())
 
     
@@ -491,28 +492,35 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
      * @param {string} configName - Config file name
      * @returns {path} Path to the created config file
      */
-    static createConfigFile(configName){
+    static createConfigFile(configName) {
         const worktreePath = this.findWorktreePath()
         const newFilePath = path.join(worktreePath, configName)
+        const configDefaultData = {
+            gitWorkTreeScriptConfig:{
+            markdownEditorFolderPath: "",
+            projectPrefix: ""      
+            }
+            };
         
         try{
-        fs.writeFileSync(newFilePath, '')
+        writeFileSync(newFilePath, JSON.stringify(configDefaultData, null, 2))
         console.log('File created successfully!');
-        retur
+        return newFilePath;
         } catch (err) {
             console.error('Failed to create file:', err);
         }
     }
     /**
      * @description When the property does not exist or is empty this method will ask the user to fill it, when it does have data then it will simply let the property untouched
-     * @param {*} property 
-     * @param {*} absolutePath
+     * @param {string} property - Property of the config file you want to ensure has data
+     * @param {path} absolutePath - Absolute path of the config file
      * @returns 
      */
     static setUpPropertiesOfConfig(property, absolutePath){
         // Check if property in file contains data
+        let configData;
         try {
-            const configData  = fs.readFile(absolutePath, 'utf8');
+            configData  = readFileSync(absolutePath, 'utf8');
         } catch (error) {
              console.error(`Fail to access the config file ${absolutePath}`, error)
         }
@@ -527,7 +535,7 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
         const jsonProp = configJSON.gitWorkTreeScriptConfig[property]
         if (!jsonProp || jsonProp == '') {
 
-            const rl = readline.createInterface({ input, output });
+            const rl = readline.createInterface({input: process.stdin, output: process.stdout});
 
             try {
                 // This pauses execution until the user hits 'Enter'
@@ -554,8 +562,9 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
     }
 
     static accessPropertiesOfConfig(property, absolutePath){
+        let configData;
         try {
-            const configData  = fs.readFile(absolutePath, 'utf8');
+            configData  = readFileSync(absolutePath, 'utf8');
         } catch (error) {
              console.error(`Fail to access the config file ${absolutePath}`, error)
         }
