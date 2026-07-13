@@ -2,7 +2,8 @@
   "type": "module",
   "dependencies": {
     "app-root-path": "^3.1.0",
-    "gray-matter": "^4.0.3"
+    "gray-matter": "^4.0.3",
+    "readline-sync": "^1.4.10"
   },
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"

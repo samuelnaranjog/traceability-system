@@ -2,10 +2,12 @@
 import appRoot from "app-root-path";
 import { basename, dirname, parse} from "node:path";
 import path from 'path'
-import { mkdirSync, readdir, readdirSync, readFileSync, renameSync, symlink, unlink, writeFileSync } from "node:fs";
+import { mkdirSync, openSync, readdir, readdirSync, readFileSync, renameSync, symlink, symlinkSync, unlink, unlinkSync, writeFileSync } from "node:fs";
 import { config, cwd } from "node:process";
 import { spawn, execSync, spawnSync } from "node:child_process";
-import * as readline from "node:readline/promises";
+import readlineSync from 'readline-sync';
+import { stdin as input, stdout as output } from 'process';
+import { createInterface } from "node:readline/promises";
 
 /*cr
  * @typedef {string} prefix - The project prefix id
@@ -91,7 +93,8 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
         const parentFolderName = basename(parentPath);
 
         //4. Compare to the prefix and define if is prefix or not
-        if(parentFolderName == prefix){
+        console.log(`DEBUG: Comparing ${parentFolderName} with ${prefix} result is: ${parentFolderName == prefix}`)//uncoment to debug
+        if(parentFolderName == prefix){ // Change exact mathc to start + 6 chars or only prefix to work in tests
             return true;
         }
         else {
@@ -364,18 +367,20 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
 
         try{
             const workTreePath = path.join(absolutePrefixPath, artifactName)
-            execSync(`git worktree add ${workTreePath} ${artifactName}`, {
+            spawnSync('git', ['worktree', 'add', workTreePath, artifactName], {
+            cwd: process.cwd(),
             encoding: 'utf8',
             stdio: ['ignore', 'pipe', 'ignore'] // Prevents git errors from leaking to console if run outside a repo
             })
+            console.log(`DEBUG: successfully created the new worktree at ${workTreePath} which should be inside prefix path ${absolutePrefixPath}` ); // to debug uncoment
+            return workTreePath;
         }
         catch(err){
             console.error(`❌ Fail to create the new worktree: ${workTreePath}`, err.message)
             process.exit(1);
         }            
 
-            console.log('New worktree successfully created at:', workTreePath ); // Uncoment for success message
-            return workTreePath;
+            
     }
 
     /**
@@ -392,7 +397,7 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
          * 
         */ 
         try{
-            const symlinksListing = readdir(editorProjectFolder, { withFileTypes: true })
+            const symlinksListing = readdirSync(editorProjectFolder, { withFileTypes: true })
             const symlinkFiltered = symlinksListing.filter(entry => entry.isSymbolicLink()) // Build an array of only symlinks
             const symlinkCount = symlinkFiltered.length; // Find the number of symlinks in the editor folder
 
@@ -400,10 +405,14 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
             if(symlinkCount > 1){
                 throw new Error (`Your markdown editor dir: ${editorProjectFolder} should only contain one symlink, manually fix the conflict`)
             }
-
-            const currentSymlinkPath = path.join(symlinkFiltered[0].path,symlinkFiltered[0].name )
-            // unlink the present symlink
-            unlink(currentSymlinkPath);
+            
+            else if(symlinkCount == 1){
+                const currentSymlinkPath = path.join(editorProjectFolder, symlinkFiltered[0].name )
+                // unlink the present symlink
+                unlinkSync(currentSymlinkPath);
+            }
+            // Handle only no symlinks at all, clean init state by simply not doing anything
+            
         }
         catch(err){
             console.error(`❌ Fail to detach the symlink `, err.message)
@@ -417,8 +426,11 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
 
         try{
             const docsTreePath = path.join(workTreePath, 'docs')
+            //if(!openSync())
             const docsEditorPath = path.join(editorProjectFolder, 'docs')// the new folder docs that will have the symlink
-            symlink(docsTreePath, editorProjectFolder)
+            symlinkSync(docsTreePath, docsEditorPath)
+
+            console.log(`DEBUG: New simlink successfuly created from ${docsEditorPath} to : ${docsTreePath}` ); // to debug uncoment
         }
         catch(err){
             console.error(`❌ Fail to create the new symlink connection for the tree: ${workTreePath}`, err.message)
@@ -516,11 +528,12 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
      * @param {path} absolutePath - Absolute path of the config file
      * @returns 
      */
-    static setUpPropertiesOfConfig(property, absolutePath){
+    static async setUpPropertiesOfConfig(property, absolutePath){
         // Check if property in file contains data
         let configData;
         try {
             configData  = readFileSync(absolutePath, 'utf8');
+            console.log(`DEBUG: current data in config file: ${configData}`); //Uncoment to debug
         } catch (error) {
              console.error(`Fail to access the config file ${absolutePath}`, error)
         }
@@ -528,32 +541,39 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
         let configJSON;
         try{
             configJSON = JSON.parse(configData);
+            console.log(`DEBUG: Successfully parse the config data: ${JSON.stringify(configJSON) }`); //Uncoment to debug
         } catch (err){
-                console.error('Fail to parse the config data')
+                console.error('Fail to parse the config data', err.message)
         }
 
         const jsonProp = configJSON.gitWorkTreeScriptConfig[property]
         if (!jsonProp || jsonProp == '') {
+            
 
-            const rl = readline.createInterface({input: process.stdin, output: process.stdout});
+            console.log(`DEBUG: Successfully Realize there is not prefix`); //Uncoment to debug
+            const rl = createInterface({ input, output });
 
             try {
-                // This pauses execution until the user hits 'Enter'
-                const answer = rl.question(`What is you project ${property}`);
+              // This pauses execution until the user hits 'Enter'
+                const answer = await rl.question(`What is your project ${property}: `);
 
-                jsonProp = answer // Add the new property data to the json config object
+                configJSON.gitWorkTreeScriptConfig[property] = answer; // Add the new property data to the json config object
+
+                console.log(`DEBUG: The answer was: ${answer}, this is the new cofig file data`, JSON.stringify(configJSON),); //Uncoment to debug
 
                 // Write the config with the new data
-                fs.writeFile(absolutePath, configJSON);
+                writeFileSync(absolutePath, JSON.stringify(configJSON));
 
                 //console.log(`Added to the config file ${answer}`); //Uncoment to debug
+            
 
             } catch(err){
                 console.error(`❌ Fail to set up the config property  ${err.message}`);
-            } 
-            finally {
-                rl.close(); // Crucial to prevent your script from hanging open
-            }
+            } finally {
+            rl.close();
+        }
+        
+            
         }
         else{
             return;
@@ -577,6 +597,7 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
         }
 
         const jsonProp = configJSON.gitWorkTreeScriptConfig[property]
+        console.log(`Obtained the prop ${property} from the config, its value is: ${jsonProp} `) // Debug log uncoment!
         return jsonProp;
     }
 

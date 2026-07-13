@@ -20,11 +20,11 @@ if(!isConfig){
     configPath = GWO.createConfigFile(configName);
     //[isConfig, configPath] = GWO.validateConfigPresence(configName)
     console.log(`DEBUG: Created config file path: ${configPath}`)//uncoment to debug
-    GWO.setUpPropertiesOfConfig("projectPrefix", configPath)
+    await GWO.setUpPropertiesOfConfig("projectPrefix", configPath)
 }
 else{
     // Validate the prefix is exist & if not add the data
-    GWO.setUpPropertiesOfConfig("projectPrefix", configPath)
+    await GWO.setUpPropertiesOfConfig("projectPrefix", configPath)
 }
 
 /** Commmand Arguments Management:
@@ -44,7 +44,7 @@ const {positionals} = cliData;
 
 /** @type {string} - The artifact prefix and the number id in lowercase e.g: req025, adr001, vs009 */
 const artifactArg = positionals[0];
-
+console.log('DEBUG: yeah! positional received', artifactArg ); // to debug uncoment
 
 /**
  * Configuration data validation:
@@ -64,7 +64,7 @@ let wormHoleStart; // TEMP: Abosulte path for the editor markdwon project folder
 
 // Set Up: Setting up the prefix folder and checking all is fine 
 const prefixDirPath = folderSetUp(prefix);
-
+console.log(`DEBUG: The set up return the prefix folder path: ${prefixDirPath}` ); // to debug uncoment
 /** 
  * Scenario A: New worktree & symlink update
  */
@@ -74,12 +74,14 @@ if (values.symlink) {
     
 
     //Handle missing editor path in the config
-    GWO.setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
+    await GWO.setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
     
     //Access symlink path in its most updated state
     wormHoleStart = GWO.accessPropertiesOfConfig('markdownEditorFolderPath', configPath)
 
     // 1. Handle new tree creation:
+
+
     const wormHoleEnd = GWO.createWorkTree(prefixDirPath, artifactArg); // The new created tree path
 
     // 2. Symlink update

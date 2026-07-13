@@ -1,4 +1,5 @@
 
+import { dirname } from "node:path";
 import GWO from "./GitWorkflowOperations.js";
 
 /**
@@ -31,14 +32,30 @@ export function folderSetUp(prefix, cwd = process.cwd()){
                 
                 prexDirPath = GWO.findMainWorkTreePathParent();
                 GWO.moveTreesToParent(prefix, prexDirPath, cwd)
+                console.log(`DEBUG: This is the prefix folder path: ${prexDirPath}` ); // to debug uncoment
                 
             }
             else {
                 // Create the prefix folder relative to the main tree and move trees there
                 prexDirPath = GWO.createPrefixFolder(prefix, cwd);
+                console.log(`DEBUG: successfully created prefix directory its path is: ${prexDirPath}` ); // to debug uncoment
                 GWO.moveTreesToParent(prefix, prexDirPath, cwd);
             }
+        }else{
+            
+            prexDirPath = dirname(cwd);
+            console.log(`DEBUG: This is the prefix folder path: ${prexDirPath}` ); // to debug uncoment
         }
 
-        return prexDirPath
+        /**
+         * Handle the case where the worktree is in the prefix folder but the main tree isn't
+         */
+
+        const mainTreePath =  GWO.findMainWorkTreePath(cwd);
+        const isMainPrex = GWO.isParentPrefix(prefix, mainTreePath);
+        if(isMainPrex == false){
+            GWO.moveTreesToParent(prefix, prexDirPath, cwd);
+        }
+
+        return prexDirPath;
 }
