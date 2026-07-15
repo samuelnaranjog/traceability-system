@@ -1,9 +1,11 @@
+// @trace REQ-023 @
 import os from 'os';
 import fs from 'fs'
 import { spawn, spawnSync } from 'child_process';
 import { execSync } from 'child_process';
 import path, { basename } from 'path';
 import { error } from 'console';
+import { jest } from '@jest/globals';
 
 /**
  * Resolves a path safely across all OS environments, handling macOS temp directory 
@@ -26,7 +28,9 @@ const getCanonicalPath = (targetPath) => {
     return path.join(existingRealRoot, pathSuffix);
 };
 
-describe('Integration test with command flags of the spawn local orchestrator of worktrees', ()=>{
+describe('Integration test with the most important command flags of the `spawn` local orchestrator of worktrees', () => {
+
+
     let mainRepoPath;
     let sandboxRoot;
     let expectedPrefix;
@@ -34,10 +38,13 @@ describe('Integration test with command flags of the spawn local orchestrator of
     let mainDocs;
     
 
-    beforeAll(() => {
+
+
+    beforeEach(() => {
+        
 
         //Temporary root directory
-        
+
         sandboxRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'pro'));
         expectedPrefix = basename(sandboxRoot);
         mainRepoPath = path.join(sandboxRoot, 'main');
@@ -57,7 +64,7 @@ describe('Integration test with command flags of the spawn local orchestrator of
         mdEditor = fs.mkdtempSync(path.join(os.tmpdir(), 'traceability-system'));
     })
 
-    afterAll(() => {
+    afterEach(() => {
         // Clean up the main sandbox directory (which includes mainRepoPath and the .git folder)
         if (sandboxRoot && fs.existsSync(sandboxRoot)) {
             fs.rmSync(sandboxRoot, { recursive: true, force: true });
@@ -66,50 +73,62 @@ describe('Integration test with command flags of the spawn local orchestrator of
         // Clean up the markdown editor temporary directory
         if (mdEditor && fs.existsSync(mdEditor)) {
             fs.rmSync(mdEditor, { recursive: true, force: true });
-        }})
+        }
 
-    test('Git Tree Workflow & Symlink Connection To The Markdown Editor Update', (done) => {
-         const scriptPath = path.resolve('./src/scripts/git-tree-workflow/SpawnEngine.js');
         
-      const child = spawn('node', [scriptPath, 'req023', '-s'], { 
-            cwd: mainRepoPath, 
+    })
+
+    test('Git Worktree Creation  & Symlink Connection To The Markdown Editor Update', (done) => {
+        const scriptPath = path.resolve(import.meta.dirname, '../../src/scripts/git-tree-workflow/SpawnEngine.js')
+
+        const child = spawn('node', [scriptPath, 'req023', '-s'], {
+            cwd: mainRepoPath,
             stdio: ['pipe', 'pipe', 'pipe'] // This guarantees the streams exist
         });
 
         let streamBuffer = '';
         let errorOutput = '';
 
-        
+
         // Ghost Typist
-        
+
         child.stdout.on('data', (data) => {
-             const text = data.toString();
-    console.log(`CHILD LOG: ${text}`);
-    streamBuffer += text;
+            const text = data.toString();
+            console.log(`CHILD LOG: ${text}`);
+            streamBuffer += text;
 
-    if (streamBuffer.includes('What is your project projectPrefix')) {
-        child.stdin.write(`${expectedPrefix}\n`);
-        streamBuffer = '';
-    }
+            if (streamBuffer.includes('What is your project projectPrefix')) {
+                child.stdin.write(`${expectedPrefix}\n`);
+                streamBuffer = '';
+            }
 
-    if (streamBuffer.includes('What is your project markdownEditorFolderPath')) {
-        child.stdin.write(`${mdEditor}\n`);
-        streamBuffer = '';
-    }
+            if (streamBuffer.includes('What is your project markdownEditorFolderPath')) {
+                child.stdin.write(`${mdEditor}\n`);
+                streamBuffer = '';
+            }
         });
-        
+
         child.stderr.on('data', (data) => {
-            console.log('ERROR: ', data.toString());
+            const text = data.toString()
+            console.log('ERROR: ', text);
+            errorOutput += text
         });
         // 4. Wait for the engine to cleanly exit
         child.on('close', (code) => {
             try {
+                
+
                 if (code !== 0) {
                     console.error("SCRIPT CRASHED. Error Output:\n", errorOutput);
                 }
 
                 // Check for crash
                 expect(code).toBe(0);
+
+                // Check new wortree creation
+                const createdTree = getCanonicalPath(path.join(sandboxRoot, 'req023'));
+                const isTreecreated = fs.existsSync(createdTree);
+                expect(isTreecreated).toBe(true)
 
                 // Check the symlink
                 // Reconstruct your expected paths
@@ -127,12 +146,91 @@ describe('Integration test with command flags of the spawn local orchestrator of
                 expect(getCanonicalPath(actualTarget)).toBe(getCanonicalPath(expectedTarget));
 
                 // Finish successfully
-                done(); 
+                done();
             } catch (error) {
                 // Catch assertion errors so we don't get a Phantom Pass
-                done(error); 
-            } 
+                done(error);
+            }
+        });
+
+    }, 5000);
+
+    test('Git Worktree Creation  & VS Code CLI open & Config File Already Created', (done) => {
+        // Create the config file to avoid readline.questions
+        const configMockData = {
+                    gitWorkTreeScriptConfig:{
+                    markdownEditorFolderPath: mdEditor,
+                    projectPrefix: expectedPrefix      
+                    }
+                    };
+
+        const configlocation = path.join(mainRepoPath, 'system-config.json')
+        fs.writeFileSync(configlocation, JSON.stringify(configMockData))
+        
+        // Check actual data has been written 
+        fs.openSync(configlocation)
+
+        const scriptPath = path.resolve(import.meta.dirname, '../../src/scripts/git-tree-workflow/SpawnEngine.js')
+
+
+        const child = spawn('node', [scriptPath, 'req023', '-c'], {
+            cwd: mainRepoPath,
+            stdio: ['pipe', 'pipe', 'pipe'] // This guarantees the streams exist
+        });
+        let outputData = ''
+        child.stdout.on('data', (data) => {
+            text = data.toString()
+            console.log(`CHILD LOG: ${text}`);
+            outputData += text ;
+        })
+
+        let errorOutput;
+        child.stderr.on('data', (data) => {
+            const text = data.toString()
+            console.log('ERROR: ', text);
+            errorOutput += text
+        });
+    
+        //Set up expectations based on the current platform running the test
+        let expectedCommand;
+        let expectedArgs;
+        const expectedTarget = path.join(sandboxRoot, 'req023');
+
+        if (process.platform === 'win32') {
+            expectedCommand = 'cmd.exe';
+            expectedArgs = ['/c', 'code', expectedTarget];
+        } else if (process.platform === 'darwin') {
+            expectedCommand = 'open';
+            expectedArgs = ['-a', 'Visual Studio Code', expectedTarget];
+        } else {
+            expectedCommand = 'code';
+            expectedArgs = [expectedTarget];
+        }
+
+
+
+         child.on('close', (code) => {
+            try {
+                if (code !== 0) {
+                    console.error("SCRIPT CRASHED. Error Output:\n", errorOutput);
+                }
+
+                // Check for crash
+                expect(code).toBe(0);
+
+                expect(outputData).toContain(`Launched VS Code for: ${getCanonicalPath(expectedTarget)}`);
+                // Finish successfully
+                done();
+            } catch (error) {
+                // Catch assertion errors so we don't get a Phantom Pass
+                done(error);
+            }
         });
         
-    }, 5000);
+    });
 })
+
+
+
+
+

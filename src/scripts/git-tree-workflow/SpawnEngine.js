@@ -1,9 +1,11 @@
+#!/usr/bin/env node
 // @trace REQ-023 ADR-008 @
 
 import GWO from "./GitWorkflowOperations.js"
 import { folderSetUp } from "./SpawnEngineHelper.js"
 import { parseArgs} from 'node:util'
 
+console.log('==== LAUNCH THE SPAWN ENGINE =====')//to debug uncoment
 // Worktree within correct folder
 
 // CONFIG AND VARIABLES SET UP
@@ -23,6 +25,7 @@ if(!isConfig){
     await GWO.setUpPropertiesOfConfig("projectPrefix", configPath)
 }
 else{
+    console.log(`DEBUG: This is the config file path which is indeed found ${configPath}`)//to debug uncoment
     // Validate the prefix is exist & if not add the data
     await GWO.setUpPropertiesOfConfig("projectPrefix", configPath)
 }
@@ -69,9 +72,9 @@ console.log(`DEBUG: The set up return the prefix folder path: ${prefixDirPath}` 
  * Scenario A: New worktree & symlink update
  */
 
-if (values.symlink) {
+if (values.symlink && !values.code ) {
 
-    
+    console.log(`==== BEGAN THE CREATION OF TREE SYMLINK AND INSTANCE OF VS =====`)//to debug uncoment
 
     //Handle missing editor path in the config
     await GWO.setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
@@ -94,6 +97,7 @@ if (values.symlink) {
 
 else if(values.symlink && values.code) {
 
+    console.log('==== BEGAN THE CREATION OF SYMLINK AND INSTANCE OF VS =====')//to debug uncoment
     //Handle missing editor path in the config
     GWO.setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
     
@@ -104,7 +108,7 @@ else if(values.symlink && values.code) {
     const worktreePath = GWO.createWorkTree(prefixDirPath, artifactArg); // The new created tree path
 
     // 2. Symlink update
-    GW0.updateSymlink(wormHoleStart, worktreePath);
+    GWO.updateSymlink(wormHoleStart, worktreePath);
 
     // 3. VsCode instance
     GWO.launchVSCode(worktreePath);
@@ -115,7 +119,7 @@ else if(values.symlink && values.code) {
  */
 else if(!values.symlink && values.code){
     // 1. Handle new tree creation:
-    GWO.createWorkTree(prefixDirPath, artifactArg); // The new created tree path
+    const worktreePath = GWO.createWorkTree(prefixDirPath, artifactArg); // The new created tree path
 
     // 2. VsCode instance
     GWO.launchVSCode(worktreePath);

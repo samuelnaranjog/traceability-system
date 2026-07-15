@@ -366,12 +366,18 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
     static createWorkTree(absolutePrefixPath, artifactName){
 
         try{
+            console.log(`This are the 2 variables that will be join to buidl the target path ${absolutePrefixPath} and ${artifactName}`)//to debug uncoment
             const workTreePath = path.join(absolutePrefixPath, artifactName)
-            spawnSync('git', ['worktree', 'add', workTreePath, artifactName], {
+            
+            const result = spawnSync('git', ['worktree', 'add', workTreePath, '-b', artifactName], {
             cwd: process.cwd(),
             encoding: 'utf8',
-            stdio: ['ignore', 'pipe', 'ignore'] // Prevents git errors from leaking to console if run outside a repo
+            stdio: ['ignore', 'pipe', 'pipe'] // Prevents git errors from leaking to console if run outside a repo
             })
+
+            if(result.status !== 0){
+                throw new Error(`Git exited with code ${result.status}. Details: ${result.stderr.trim()}`)
+            }
             console.log(`DEBUG: successfully created the new worktree at ${workTreePath} which should be inside prefix path ${absolutePrefixPath}` ); // to debug uncoment
             return workTreePath;
         }
@@ -479,24 +485,26 @@ if (currentDirectory.status !== 0 || !currentDirectory.stdout) {
      * @returns 
      */
     static validateConfigPresence(configName){
+        console.log('==== Validating config presence =====')//to debug uncoment
         const worktreeFolder = this.findWorktreePath()
         const items = readdirSync(worktreeFolder, {withFileTypes: true});
         const files = items.filter(item => item.isFile())
-
+        console.log(`Current files in the system ${JSON.stringify(files)} --- Config file name to compare ${configName} `)//to debug uncoment
     
-        let path = undefined;
+        let foundPath = undefined;
         let hasConfig;
-        const configFile = files.find(file => {file.name == configName})
+        const configFile = files.find(file => file.name == configName)
+        console.log(`Data extracted from config ${JSON.stringify(configFile)}`)//to debug uncoment
         
         if(configFile){
             hasConfig = true
-            path = path.join(configFile.path, configFile.name)
+            foundPath = path.join(configFile.path, configName)
         }
         else {
             hasConfig = false;
         }
 
-        return [hasConfig, path];
+        return [hasConfig, foundPath];
     }
 
     /**
