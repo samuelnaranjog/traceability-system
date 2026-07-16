@@ -66,7 +66,11 @@ const prefix = GWO.accessPropertiesOfConfig('projectPrefix', configPath); // TEM
 let wormHoleStart; // TEMP: Abosulte path for the editor markdwon project folder
 
 // Set Up: Setting up the prefix folder and checking all is fine 
-const prefixDirPath = folderSetUp(prefix);
+const [prefixDirPath, possibleNewConfig] = folderSetUp(prefix, undefined, configName );
+
+// Update configPath to the new possible location
+if(possibleNewConfig) configPath = possibleNewConfig;
+
 console.log(`DEBUG: The set up return the prefix folder path: ${prefixDirPath}` ); // to debug uncoment
 /** 
  * Scenario A: New worktree & symlink update
@@ -75,7 +79,7 @@ console.log(`DEBUG: The set up return the prefix folder path: ${prefixDirPath}` 
 if (values.symlink && !values.code ) {
 
     console.log(`==== BEGAN THE CREATION OF TREE SYMLINK AND INSTANCE OF VS =====`)//to debug uncoment
-
+    
     //Handle missing editor path in the config
     await GWO.setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
     
@@ -99,7 +103,10 @@ else if(values.symlink && values.code) {
 
     console.log('==== BEGAN THE CREATION OF SYMLINK AND INSTANCE OF VS =====')//to debug uncoment
     //Handle missing editor path in the config
-    GWO.setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
+
+    console.log("DEBUG: process.cwd() is currently:", process.cwd());
+    console.log("DEBUG: The path we are trying to read is:", configPath); // or whatever variable holds the path
+    await GWO.setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
     
     //Access symlink path in its most updated state
     wormHoleStart = GWO.accessPropertiesOfConfig('markdownEditorFolderPath', configPath)
