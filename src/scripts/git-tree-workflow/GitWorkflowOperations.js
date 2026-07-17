@@ -1,11 +1,9 @@
 // Project Root path
-import appRoot from "app-root-path";
 import { basename, dirname, parse} from "node:path";
 import path from 'path'
 import { mkdirSync, openSync, readdir, readdirSync, readFileSync, renameSync, symlink, symlinkSync, unlink, unlinkSync, writeFileSync } from "node:fs";
 import { config, cwd } from "node:process";
 import { spawn, execSync, spawnSync } from "node:child_process";
-import readlineSync from 'readline-sync';
 import { stdin as input, stdout as output } from 'process';
 import { createInterface } from "node:readline/promises";
 
