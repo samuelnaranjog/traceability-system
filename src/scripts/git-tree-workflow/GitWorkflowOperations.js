@@ -767,7 +767,7 @@ export default class GitWorkflowOperations {
     
   }
   catch(error){
-    console.error(`Rebase and Squash operation failed: ${error.message}`);
+    console.error(`Rebase and Squash operation failed: ${error}`);
     process.exit(1);
   }
 }
@@ -779,9 +779,9 @@ export default class GitWorkflowOperations {
  */
 static currentBranchName(cwd = process.cwd()){
   try{
-    branch = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD']{
+    const branch = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'],{
       cwd: cwd,
-      encoding: 'utf-8',
+      encoding: 'utf-8'
     })
 
     if(branch.error){
@@ -795,7 +795,7 @@ static currentBranchName(cwd = process.cwd()){
 
   }
   catch(error){
-    console.error(`Git Branch operation failed: ${error.message}`);
+    console.error(`Git Branch operation failed: ${error}`);
     process.exit(1);
 
   }
@@ -824,7 +824,7 @@ static mergeOperation(cwd = process.cwd(), branch){
     console.log(`Successfully merged ${branch} into current branch.`);
   }
   catch(error){
-    console.error(`The merge failed: ${error.message}`);
+    console.error(`The merge failed: ${error}`);
     process.exit(1);
   }
 }
@@ -837,7 +837,7 @@ static mergeOperation(cwd = process.cwd(), branch){
     try{
 
       const remove = spawnSync('git', ['worktree', 'remove', targetTree],{
-      cwd: cwd,
+      cwd: process.cwd(),
       encoding: 'utf-8'
     })
 
@@ -853,7 +853,7 @@ static mergeOperation(cwd = process.cwd(), branch){
 
     }
     catch(error){
-      console.error(`The worktree removal failed: ${error.message}`);
+      console.error(`The worktree removal failed: ${error}`);
       process.exit(1);
     }
   }
@@ -884,7 +884,7 @@ static mergeOperation(cwd = process.cwd(), branch){
 
     }
     catch(error){
-      console.error(`The branch removal failed: ${error.message}`);
+      console.error(`The branch removal failed: ${error}`);
       process.exit(1);
     }
 

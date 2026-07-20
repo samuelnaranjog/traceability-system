@@ -41,6 +41,9 @@ else{
     await GWO.setUpPropertiesOfConfig("projectPrefix", configPath)
 }
 
+// Ensure the path exist, or prompt for it.
+await GWO.setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
+
 const markdownEditorPath = GWO.accessPropertiesOfConfig('markdownEditorFolderPath', configPath)
 
 GWO.updateSymlink(markdownEditorPath, mainCWD);
