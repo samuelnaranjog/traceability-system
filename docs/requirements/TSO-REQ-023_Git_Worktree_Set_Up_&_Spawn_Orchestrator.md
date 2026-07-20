@@ -14,8 +14,8 @@ Description: This feature provides a system orchestrator initialization engine c
 **So that** the workflow for git traceability is automated in the most tedious operations such as:
 > - symlink for the markdown editor
 > - worktree creation and symlink unlink
-> - Default connection to the main while 
-> - Deletion of the complete worktree. 
+> - Default connection to the main worktree 
+> 
 
 
 ## Acceptance Criteria

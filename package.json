@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "description": "My custom cross-device script",
   "bin": {
-    "spawn": "./src/scripts/git-tree-workflow/SpawnEngine.js"
+    "spawn": "./src/scripts/git-tree-workflow/SpawnEngine.js",
+    "collapse": "./src/scripts/git-tree-workflow/CollapseEngine.js"
   },
   "preferGlobal": true,
   "keywords": [],

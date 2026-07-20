@@ -1,3 +1,5 @@
+// @trace REQ-023 @
+
 // Project Root path
 import { basename, dirname, parse} from "node:path";
 import path from 'path'
@@ -7,7 +9,7 @@ import { spawn, execSync, spawnSync } from "node:child_process";
 import { stdin as input, stdout as output } from 'process';
 import { createInterface } from "node:readline/promises";
 
-/*cr
+/**
  * @typedef {string} prefix - The project prefix id
  * @typedef {string} path - Valid absolute path
 */
@@ -21,7 +23,7 @@ import { createInterface } from "node:readline/promises";
 export default class GitWorkflowOperations {
   /**
    *  @description Find the current worktree dir path
-   *  @param {path} customPath - The path of the worktree or subfolder from which you want to find the aboslute path
+   *  @param {path} customPath - The path of the worktree or subfolder from which you want to find the aboslute path, , fallback to current cwd 
    *  @returns {path} The path of the worktree were the command was launched
    */
   static findWorktreePath(customPath = process.cwd()) {
@@ -156,7 +158,7 @@ export default class GitWorkflowOperations {
 
   /**
    * Run from a valid worktree to work properly
-   * @param {path} customPath - The path of the worktree or subfolder from which you want to find the main worktree
+   * @param {path} customPath - The path of the worktree or subfolder from which you want to find the main worktree, , fallback to current cwd 
    * @returns {path} Main work-tree absolute path
    */
   static findMainWorkTreePath(customPath = process.cwd()) {
@@ -635,6 +637,13 @@ export default class GitWorkflowOperations {
     }
   }
 
+  /**
+   * 
+   * @param {string} property - Property to extract
+   * @param {path} absolutePath - Absolute path to the config file
+   * @returns {string} Data extracted from the config
+   */
+
   static accessPropertiesOfConfig(property, absolutePath) {
     let configData;
     try {
@@ -712,6 +721,173 @@ export default class GitWorkflowOperations {
       process.exit(1);
     }
   }
+
+  /**
+   * @description This method performs a git rebase from the head of main
+   * @description Should be run directly from the worktree or use a custom cwd in the arguments
+   * @param {path} customPath - Allows you to set a custom path for the operation, fallback to current cwd 
+   */
+  static rebaseSquash(cwd = process.cwd(), targetBranch = 'main'){
+
+    try{
+
+    
+    // Calculate the merge-base commit hash synchronously
+    const mergeBase = spawnSync('git', ['merge-base', 'HEAD', targetBranch], {
+      cwd,
+      encoding: 'utf-8',
+    });
+
+    if (mergeBase.error) {
+    throw new Error(`Failed to spawn git merge-base: ${mergeBase.error.message}`);
+  }
+  if (mergeBase.status !== 0) {
+    throw new Error(`git merge-base failed: ${mergeBase.stderr.trim()}`);
+  }
+
+  const baseCommit = mergeBase.stdout.trim();
+
+  //Run interactive rebase against base commit
+  const rebase = spawnSync('git', ['rebase', '-i', baseCommit],{
+    cwd,
+    stdio: 'inherit',
+  })
+
+  
+  if (rebase.error) {
+    throw new Error(`Failed to spawn git rebase: ${rebase.error.message}`);
+  }
+
+  if (rebase.status !== 0) {
+    throw new Error(`git rebase exited with status code ${rebase.status}`);
+  }
+
+  
+
+    
+  }
+  catch(error){
+    console.error(`Rebase and Squash operation failed: ${error}`);
+    process.exit(1);
+  }
 }
 
+/**
+ * @description Method to find the current branch
+ * @param {path} cwd - Allows you to set a custom path for the operation, fallback to current cwd 
+ * @returns {string} Current checkout branch
+ */
+static currentBranchName(cwd = process.cwd()){
+  try{
+    const branch = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'],{
+      cwd: cwd,
+      encoding: 'utf-8'
+    })
+
+    if(branch.error){
+       throw new Error(`Failed to spawn git current branch: ${branch.error.message}`);
+    }
+    if(branch.status !== 0){
+       throw new Error(`Failed to find current git branch: ${branch.status}`);
+    }
+
+    return branch.stdout.trim();
+
+  }
+  catch(error){
+    console.error(`Git Branch operation failed: ${error}`);
+    process.exit(1);
+
+  }
+}
+
+/**
+ * @description Method performs a merge to main
+ * @param {path} cwd - The path of main, fallback current cwd
+ * @param {string} branch - The name of the branch which will be merged
+ */
+static mergeOperation(cwd = process.cwd(), branch){
+  try{
+    const merge = spawnSync('git', ['merge', '--ff-only', branch],{
+      cwd: cwd,
+      encoding: 'utf-8'
+    })
+
+    if(merge.error){
+       throw new Error(`Failed to spawn git merge operation: ${remove.error.message}`);
+    }
+
+    if(merge.status !== 0){
+       throw new Error(`Failed to merge ${branch} to main: ${remove.status}`);
+    }
+
+    console.log(`Successfully merged ${branch} into current branch.`);
+  }
+  catch(error){
+    console.error(`The merge failed: ${error}`);
+    process.exit(1);
+  }
+}
+
+  /**
+   * @description Removes the worktree must be run from a valid worktree
+   * @param {path} targetTree - The tree you want to delete
+   */
+  static removeWorktree(targetTree){
+    try{
+
+      const remove = spawnSync('git', ['worktree', 'remove', targetTree],{
+      cwd: process.cwd(),
+      encoding: 'utf-8'
+    })
+
+    if(remove.error){
+       throw new Error(`Failed to spawn git remove operation: ${remove.error.message}`);
+    }
+
+    if(remove.status !== 0){
+       throw new Error(`Failed to delete ${basename(targetTree)} worktree: ${remove.status}`);
+    }
+
+    console.log(`Successfully delete ${basename(targetTree)}.`);
+
+    }
+    catch(error){
+      console.error(`The worktree removal failed: ${error}`);
+      process.exit(1);
+    }
+  }
+
+  /**
+   * @description Remove the branch 
+   * @param {path} [cwd=process.cwd()] cwd - The path of main or worktree that doenst have checkout the branch to delete, fallback current cwd
+   * @param {string} branchName - The name of the branch to delete
+   */
+  static removeBranch(cwd = process.cwd(), branchName){
+    try{
+
+      //Use -d for safe delete
+      const remove = spawnSync('git', ['branch', '-d', branchName],{
+      cwd: cwd,
+      encoding: 'utf-8'
+    })
+
+    if(remove.error){
+       throw new Error(`Failed to spawn git branch remove operation: ${remove.error.message}`);
+    }
+
+    if(remove.status !== 0){
+       throw new Error(`Failed to delete ${branchName} branch: ${remove.status}`);
+    }
+
+    console.log(`Successfully delete the branch ${branchName}.`);
+
+    }
+    catch(error){
+      console.error(`The branch removal failed: ${error}`);
+      process.exit(1);
+    }
+
+  }
+}
 
