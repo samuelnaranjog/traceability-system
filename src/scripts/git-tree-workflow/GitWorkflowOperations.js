@@ -867,7 +867,7 @@ static mergeOperation(cwd = process.cwd(), branch){
     try{
 
       //Use -d for safe delete
-      const remove = spawnSync('git', ['branch', '-d', branchName],{
+      const remove = spawnSync('git', ['branch', '-D', branchName],{
       cwd: cwd,
       encoding: 'utf-8'
     })
