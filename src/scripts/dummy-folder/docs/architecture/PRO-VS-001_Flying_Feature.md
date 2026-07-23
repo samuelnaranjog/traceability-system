@@ -1,7 +1,0 @@
----
-Project:
-State:
-Description:
----
-## Diagram
-

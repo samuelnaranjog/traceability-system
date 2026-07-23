@@ -50,14 +50,12 @@ TABLE WITHOUT ID regexreplace(file.name, "^.*?-(\\d+)_.*$", "$1") AS "ID", State
 ```dataview
 TABLE WITHOUT ID regexreplace(file.name, "^.*?-(\\d+)_.*$", "$1") AS "ID", link(file.path, regexreplace(file.name, "^.*?\d+[_ \-]*", "")) AS "Requisite", Description
 FROM "Projects/Traceability_System/docs/requirements"
-WHERE contains(file.name, "TSO-REQ") AND !endswith(file.name, "Analytical_Breakdown" ) AND status != "5-Deprecated"
+WHERE contains(file.name, "TSO-REQ")  AND !regexmatch(".*Analytical_Breakdown(?:_\d+)?(?:\.md)?$", file.name) AND status != "5-Deprecated"
 SORT regexreplace(file.name, "^.*?-(\\d+)_.*$", "$1") 
 ```
 ## **📕Architectural Decision Record (ADRs)**
 ```dataview
-TABLE WITHOUT ID regexreplace(file.name, "^.*?-(\\d+)_.*$", "$1") AS "ID", link(file.path, regexreplace(file.name, "^.*?\d+[_ \-]*", "")) AS "Architectural Decision", Description
-FROM "Projects/Traceability_System/docs/architecture"
-WHERE contains(file.name, "TSO-ADR") AND !endswith(file.name, "Analytical_Breakdown" )
-SORT regexreplace(file.name, "^.*?-(\\d+)_.*$", "$1") 
+TABLE WITHOUT ID regexreplace(file.name, "^.*?-(\\d+)_.*$", "$1") AS "ID", link(file.path, regexreplace(file.name, "^.*?\d+[_ \-]*", "")) AS "Architectural Decision", Description, state
+FROM "Projects/Traceability_System/docs/architecture" WHERE contains(file.name, "TSO-ADR") AND state != "Deprecated" AND !endswith(file.name, "Analytical_Breakdown") SORT regexreplace(file.name, "^.*?-(\d+)_.*$", "$1") ASC
 ```
 
