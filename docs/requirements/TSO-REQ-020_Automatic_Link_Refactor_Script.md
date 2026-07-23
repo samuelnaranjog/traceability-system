@@ -76,7 +76,7 @@ Description: A script that updates the links of code files trigger by a commit
 > [!todo] **Scenario:** Handling hand written links that survive in the connection table like prototypes to figma or others
 > `Precondition - Action - Outcome`
 > 
-> **Given** .... , **When** .... , **Then**
+> **Given** The System has collected the files and related them to the specific artifact which they reference , **When** the command rfr or the builder make a commit , **Then**
 > 
 
 > [!todo] **Scenario:** Self healing global project script
@@ -89,7 +89,7 @@ Description: A script that updates the links of code files trigger by a commit
 | **Problem Solving documentation** | **File**                                                                |
 | --------------------------------- | ----------------------------------------------------------------------- |
 | 2026-06-17                        | [TSO-REQ-020_Analytical_Breakdown](TSO-REQ-020_Analytical_Breakdown.md) |
-
+| 2026-07-21                        |                                                                         |
 
 --- 
 ###### Links: 
