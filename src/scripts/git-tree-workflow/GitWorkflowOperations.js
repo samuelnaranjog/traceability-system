@@ -891,3 +891,5 @@ static mergeOperation(cwd = process.cwd(), branch){
   }
 }
 
+export const findWorkTreePath = GitWorkflowOperations.findWorktreePath
+

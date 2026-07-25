@@ -1,9 +1,20 @@
-// @trace REQ-020 ADR-006
+// @trace REQ-020 ADR-006 @ 
 
-import { error } from 'node:console';
+import console, { error } from 'node:console';
 import path from 'node:path';
-import fs, {readFileSync } from "node:fs";
+import fs, {Dirent, readFileSync } from "node:fs";
 import matter from "gray-matter";
+
+//AST
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
+import remarkStringify from 'remark-stringify';
+import { visit } from 'unist-util-visit';
+import { toString } from 'mdast-util-to-string';
+
+// Built Methods
+import {findWorkTreePath} from './git-tree-workflow/GitWorkflowOperations';
 
 class DuplicateArtifact extends Error {
     constructor(message) {
@@ -176,7 +187,7 @@ export default class TraceabilityPipeline{
 
 
             /**
-             * @typedef {Set<string>} classification
+             * @type {Set<string>} classification
              */
             const classification = new Set(); //Store the current classification
             
@@ -376,5 +387,287 @@ export default class TraceabilityPipeline{
 
         
         
+    }}
+
+    /**
+     * @description Extract the file link from a file "# connections" section table 
+     * @description Build a data structure, adding {Map<link, classification>}
+     * @param {string} artifacFilePath - Absolute path to the artifact to scan
+     * @returns {fileLinksMap} A data structure that map links and its type
+     */
+    static buildFileLinks(artifacFilePath, linkAndClassificationMap) {
+        let artifactData;
+        try {
+            artifactData = readFileSync(artifactAbsolutePath, "utf8");
+        } catch (error) {
+            console.error(`Fail to access the config file ${absolutePath}`, error);
+        }
+
+        let fileASTData;
+        try {
+            fileASTData = remarkParse(artifactData);
+        } catch (error) {
+            console.error(`Fail to Parse to AST the artifact file`, error.message);
+            process.exit(1)
+        }
+
+        // My map structure of type
+        /** @type  {fileLinksMap} */
+        const fileLinksMap = new Map();
+        try {
+            visit(fileASTData, 'heading', (node, index, parent) => {
+                const headingText = node.children.map(c => c.value).join('')
+
+                if (headingText.toLowerCase() == 'connections') {
+                    const nextSibling = parent.children[index + 1];
+
+                    if (nextSibling?.type !== 'table') return
+
+                    const dataRows = nextSibling.children.slice(1);
+
+                    for (const row of dataRows) {
+                        if (row.type !== 'tableRow') continue;
+
+                        const [categoryLabel, valueCell] = row.children;
+                        
+                        const classification = toString(categoryLabel).trim()
+                        visit(valueCell, 'link', (node) =>{
+     
+                            fileLinksMap.set(node.url, classification);
+                                
+                        })
+
+                    }
+
+                }
+
+            })
+
+
+
+
+        } catch (error) {
+            console.error(`Fail to access or navigate AST data`, error.message);
+            process.exit(1)
+        }
+        return fileLinksMap;
+
     }
-}}
+
+    /**
+     * 
+     * @param {string} artifactName 
+     * @param {ArtifactRelatedFileConnection} data  - The Artifact related links object
+     * @returns {Set} Returns a set of the artifact links in the data state passed
+     */
+    static buildRefsLinks(artifactName, data){
+        /**@type {TraceableFile[]} */
+        const fileObj = data.artifactName;
+        const linksSet = new Set()
+        for(const file of fileObj){
+            linksSet.add(file.path)
+        }
+        return linksSet
+    }
+    
+    
+    /**
+     * @typedef {string} classification
+     * @typedef {string} link
+     */
+    /** @typedef {Map<classification, link[]>} linkTypeMap */ 
+
+    /** @typedef {Map<link, clasification>} fileLinksMap */
+
+    /**
+     * @description Classifies
+     * @param {linkTypeMap} currentClasificationMap 
+     * @param {fileLinksMap} fileLinksWithTypeMap 
+     * @param {Set} pastRefsLinks 
+     * @param {Set} currentRefsLinks 
+     */
+    static classifyAndConquerHard(currentClasificationMap, fileLinksWithTypeMap, pastRefsLinks, currentRefsLinks){
+        
+        /** @type {hardLinkMap}*/
+        const hardLinkClassifiedMap = currentClasificationMap;
+
+        const fileLinks = Object.keys(fileLinksWithTypeMap)
+        for(const link of fileLinks){
+            // The link data must be sets
+            // inRp = in past reference artifact set
+            // inRc = in current reference artifact set
+
+            const inRp = pastRefsLinks.has(link);
+            const inRc = currentRefsLinks.has(link);
+            
+            // HARD LINK case
+            // Get the specific link classification and add it to the classify data structure
+                
+            if (!inRc && !inRp){
+
+                /** 
+                 * @type {Object}
+                 * @property {string} classification
+                 * @property {string} url
+                */
+                const objHard = fileLinksWithTypeMap.get(link)
+
+                if(hardLinkClassifiedMap.get(objHard.classification)){
+                    hardLinkClassifiedMap.get(objHard.classification).push(objHard.link)
+                }
+                else{
+                    hardLinkClassifiedMap.set(objHard.classification, [objHard.link])
+                }
+
+            }
+
+
+        }
+        
+        return hardLinkClassifiedMap;
+    }
+
+     /**
+     * @param {linkTypeMap} currentClassification 
+     * @param {ArtifactRelatedFileConnection | TraceableFile[]} connectedFilesInput - The source data, a raw array of traceable files comming for a specific artifact key connections.
+     * @param {classificationGuidelines} guidelines
+     * @param {regexExtractor} fileArtifactIdentifierReg - Selects only the artifact e.g: ("PRO-REQ-001" will extract "REQ")
+     * @param {regexExtractor} fileExtensionExtractionReg - Selects only the extension after the "."  e.g: ("myFile.test.js" will extract "test.js")
+     * @param {Set<string>} systemArtifactsSet - Valid system artifacts list
+     * @returns {linkTypeMap} - Map with mutated classification
+     */
+    static classifyAndConquerDynamic(currentClassification, connectedFilesInput, guidelines, fileArtifactIdentifierReg, fileExtensionExtractionReg, systemArtifactsSet) {
+        //1. Abstract the logic of classification to be define outside in the main thread
+        //2. Use a map of types like {hardlinkMap}
+
+        
+        connectedFilesInput.forEach( /** @param {TraceableFile} file */
+    (file) => {
+
+            
+            const artifactIdentfier = file.name.match(fileArtifactIdentifierReg)?.[0]; 
+
+            // ?: checks if the value exist else return undefined .[0] extracts the value
+            const extension = file.name.match(fileExtensionExtractionReg)?.[0]; 
+
+
+            /**
+             * @type {Set<string>} classification
+             */
+            const classification = new Set(); //Store the current classification
+
+            // Artifact classification guidelines
+            const artifactCategoryMap = guidelines.classificationGuidelines.artifactCategoryMap
+            const systemArtifactsSet = Object.keys(artifactCategoryMap);
+            
+
+            // Extension classification guidelines
+            const extensionCategoryMap = guidelines.classificationGuidelines.extensionCategoryMap;
+
+            // 1. Check Artifact Identifier
+            if (artifactIdentifier && systemArtifactsSet.has(artifactIdentifier)) {
+                const artifactCategory = artifactCategoryMap.get(artifactIdentifier);
+                if (artifactCategory) classification.add(artifactCategory);
+            }
+
+            // 2. Check File Extension 
+            if (extension) {
+                const extensionCategory = extensionCategoryMap.get(extension);
+                if (extensionCategory) classification.add(extensionCategory);
+            }
+
+            // 3. Fallback
+            if (classification.size === 0) {
+                classification.add("📂 Other");
+            }
+
+            // Store the classify file to the proper property
+            try{
+
+              if(classification.size > 1){
+                throw new MultiClassification(`The algoritm logic is selecting more than one category for the related file: ${file.name} \n This are the classifications:: ${[...classification]}`)
+              }
+
+              const singleCategory = [...classification][0];
+
+              if(currentClasificationMap.get(singleCategory)){
+                    currentClasificationMap.get(singleCategory).push(file.path)
+                }
+                else{
+                    currentClasificationMap.set(singleCategory, [file.path])
+                }
+              
+            }
+            catch(error){
+              console.error('Categorization critical identification uncapability');
+              throw error;
+            }
+        })
+
+        return currentClassification
+    }
+
+    /**
+     * @description Reads and extract the parsed json from a file.
+     * @param {string} absolutePath - Absolute path the file to parse
+     * @returns {Object} Parsed Object from JSON file data
+     */
+    static parseFileAndCatch (absolutePath){
+        let fileData;
+
+        try {
+              fileData = readFileSync(absolutePath, "utf8");
+              console.log(`DEBUG: current data in file to parse: ${fileData}`); //Uncoment to debug
+            } catch (error) {
+              console.error(`Fail to access the file ${absolutePath}`, error.message);
+            }
+        
+            let dataJSON;
+            try {
+              dataJSON = JSON.parse(fileData);
+              console.log(
+                `DEBUG: Successfully parse the file data: ${JSON.stringify(dataJSON)}`,
+              ); //Uncoment to debug
+            } catch (error) {
+              console.error("Fail to parse the file data", error.message);
+            }
+            return dataJSON;
+    }
+
+    /**
+     * @description Finds a top level file within a valid git repository folder
+     * @param {string} fileName - The name of the file to extract including its extension 
+     * @returns {string} Abosulute path of the found file
+     */
+    static extractTopLevelFilePath (fileName){
+        const worktreeFolder = findWorkTreePath();
+        
+        let items;
+        try{
+            const items = readdirSync(worktreeFolder, { withFileTypes: true });
+        }
+        catch(error){
+            console.error(`Failed to access or read ${worktreeFolder}`, error.message)
+        }
+        
+    
+        
+        const files = items.filter((item) => item.isFile());
+        
+        console.log(
+              `DEBUG: Current files in the system ${JSON.stringify(files)}  `); //to debug uncoment
+
+        /**@type {Dirent} */
+        const foundFile = files.find((file) => file.name == fileName);
+    
+        if(!foundFile){
+            console.error(`[Synapse |Error|] The file ${fileName} does not exist` )
+            process.exit(1);
+        }
+
+        const fullPath = path.join(foundFile.parentPath, foundFile.name);
+        return fullPath;
+
+    
+    }
+}

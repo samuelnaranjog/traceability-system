@@ -1,3 +1,4 @@
+// @trace REQ-020 @
 // This is the function that executes the system task
 
 import { config } from "node:process";
@@ -11,9 +12,35 @@ import appRoot from "app-root-path";
 
 
 
-/**
- * Configuration for the run
- */
+
+// CONFIGURATION FOR THE RUN
+ 
+
+// Helper to invert { CategoryLabel: [identifiers...] } into Map<identifier, CategoryLabel>
+function createCategoryLookupMap(ruleDefinitions) {
+  const map = new Map();
+  for (const [categoryLabel, items] of Object.entries(ruleDefinitions)) {
+    for (const item of items) {
+      map.set(item, categoryLabel);
+    }
+  }
+  return map;
+}
+
+// Build Artifact Lookup Map
+const artifactCategoryMap = createCategoryLookupMap({
+  '📕 Architecture': ["VS", "ADR"],
+  '📓 Requirements': ["REQ"],
+  '🧪 Prototypes': [],
+});
+
+// Build Extension Lookup Map
+const extensionCategoryMap = createCategoryLookupMap({
+  '⚙️ Core Logic (Backend/Systems)': ["js"],
+  '🎨 Client Layer (Frontend/UI)': ["py"],
+  '🛡️ Verification (Tests & Config)': [],
+});
+
 
 const CONFIG = {
     vaultPath: appRoot.path,
@@ -41,14 +68,10 @@ const CONFIG = {
      * - Specific file title characteristics that the algorithm should use to classify the files pointed as connections
      */
     classificationGuidelines: {
-    Architecture: ["VS", "ADR"], // Verify Artifact for clasification
-    Requirements: ["REQ"], // Verify Artifact for clasification,
-    Prototypes: [], // Hard Written links not part of automatic mapping but must persist !TODO
-    Core: ["js"],
-    Client: ["py"],
-    Verification: [],
-    Other: []
+        artifactCategoryMap: artifactCategoryMap,
+        extensionCategoryMap: extensionCategoryMap,
     },
+    synapsePastStateName : '.synapse-state.json'
     
 };
 
@@ -99,16 +122,39 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
          * - In each iteration perform the key steps for the autolinkrefacto feature
          */
 
+        
+
+        // Handle the "3 side comparison" leveraging past and present state
+        const synapsePath = ts.extractTopLevelFilePath(CONFIG.synapsePastStateName);
+
+        const synapsePastStateObj = ts.parseFileAndCatch(synapsePath);
+        
+
         /** @type {string[]} */
         const artifactsWithConnections = Object.keys(artifactRelatedToFiles)
 
         for (const artifact of artifactsWithConnections) {
             
+            // Classification Data Structure
+         /** @type {import('./TraceabilityPipeline.js').linkTypeMap} */
+        const currentClassificationMap = new Map();
             // 4. Find the artifact path
             const currentArtifactPath = ts.findArtifactFile(artifact, dirsAndFileMap.files, CONFIG.fileTitleIdentifierFilteringRegex, CONFIG.fileNameFilterRegex )
             
+            //Get ready for 3 state data
+            const fileLinksWithType = ts.buildFileLinks(currentArtifactPath) ;
+
+            const pastRefsLinks = ts.buildRefsLinks(artifact, synapsePastStateObj)
+
+            const currentRefsLinks =  ts.buildRefsLinks(artifact, artifactRelatedToFiles)
+
+            // Classify with the 3 state data
+            ts.classifyAndConquerHard(currentClassificationMap,fileLinksWithType, pastRefsLinks, currentRefsLinks)
+
+            ts.classifyAndConquerDynamic(currentClassificationMap)
+
             //5. Access the artifact connections and classify them
-            const currentArtifactClassifiedConnections = ts.classifyArtifactConnections(artifactRelatedToFiles[artifact], CONFIG.classificationGuidelines, CONFIG.fileIdentifierNoNumFilteringRegex, CONFIG.fileExtensionExtractionRegex, CONFIG.acceptedSystemArtifacts )
+            // DEPRACATE: const currentArtifactClassifiedConnections = ts.classifyArtifactConnections(artifactRelatedToFiles[artifact], CONFIG.classificationGuidelines, CONFIG.fileIdentifierNoNumFilteringRegex, CONFIG.fileExtensionExtractionRegex, CONFIG.acceptedSystemArtifacts )
 
             /** 6. Build a markdown table:
              *  - Determine wheather the artifact selected should have header or not
