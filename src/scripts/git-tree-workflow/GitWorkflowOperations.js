@@ -814,11 +814,12 @@ static mergeOperation(cwd = process.cwd(), branch){
     })
 
     if(merge.error){
-       throw new Error(`Failed to spawn git merge operation: ${remove.error.message}`);
+       throw new Error(`Failed to spawn git merge operation: ${merge.error.message}`);
     }
 
     if(merge.status !== 0){
-       throw new Error(`Failed to merge ${branch} to main: ${remove.status}`);
+       const reason = merge.stderr ? merge.stderr.trim() : `exit code ${merge.status}`;
+      throw new Error(`Failed to merge ${branch} to main: ${reason}`);
     }
 
     console.log(`Successfully merged ${branch} into current branch.`);
