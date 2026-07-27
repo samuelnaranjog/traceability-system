@@ -88,6 +88,9 @@ Data being store with neat references: {
 - [ ]  Overwirte the table with the new data.
 
 ***Note:** After this you iterate over all files present in the current state. For place where only hard written links are wirtten is not neccesary to do anything but manually create the table tipy and link, later if some reference are added it will be handled gracefully* 
+
+
+**Note:**. PLEASE CREATE AN ADR THAT EXPLAIN THE CONSTRAIN OF THE HEADER TO WRITE THE CONNECTIONS
 ```
 # Workflow Closure & Collapse orchestrator
 This feature ensures the git commit history remains clean from wips, and the closure when the development of a requirement is finished remains frictionless by automating git operations such as path finding, worktree and branch deletion. Leaving the workspace clean and ready to restart the workflow again for a new update or extra feature.
