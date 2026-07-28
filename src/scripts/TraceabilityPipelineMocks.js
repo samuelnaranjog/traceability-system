@@ -96,6 +96,8 @@ export const mockTraceabilityData = {
  * │   │   └── PRO-VS-002_GraphQL_VS_REST.md                  <-- 📍 MOCK FILE STARTING POINT
  * │   └── requirements/
  * │       └── PRO-REQ-101_Data_Ingestion.md
+ *              PRO-REQ-001_Create_Data.md
+ *              PRO-REQ-002_Print_Money.md
  * ├── prototypes/
  * │   └── 01_proof_of_concept.py
  * ├── src/
@@ -179,9 +181,7 @@ Description:
 > 
 > ---
 > *Connections*
-> <span hidden data-connections-begin></span>
-> 
-> <span hidden data-connections-end></span>
+>
 > 
 > ---
 >  ## **1. The Context (Systemic Problem)**`;
@@ -248,3 +248,5 @@ export const tableHeaderMock = `## Connections
 | **📂 Other** | [README](../../../README.md) <br> |
 
 <span hidden data-connections-end></span>`;
+
+

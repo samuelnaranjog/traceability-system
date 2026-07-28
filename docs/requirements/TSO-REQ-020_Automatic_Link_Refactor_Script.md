@@ -76,8 +76,10 @@ Description: A script that updates the links of code files trigger by a commit
 > [!todo] **Scenario:** Handling hand written links that survive in the connection table like prototypes to figma or others
 > `Precondition - Action - Outcome`
 > 
-> **Given** The System has collected the files and related them to the specific artifact which they reference , **When** the command rfr or the builder make a commit , **Then**
-> 
+> **Given** The System has collected the files and related them to the specific artifact which they reference , **When** the command `synapse` or the builder make a commit , **Then**
+> 1. It should extract the link from the connections table & identify which ones are hard links.
+> 2. It should Include the hard link in the refactored connections table 
+> 3. The hard link should be in the proper row where it was written. 
 
 > [!todo] **Scenario:** Self healing global project script
 > `Precondition - Action - Outcome`

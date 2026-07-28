@@ -63,6 +63,7 @@ const CONFIG = {
     fileIdentifierNoNumNorProjectRegex: /\b[A-Z]+(?=-\d+)/, // Select only the artifact from "REQ-001" it will extract "REQ"
     fileExtensionExtractionRegex: /(?<=\.)[a-z]+/, // Selects from a . to find the extension
     fileTitleAvoidExtensionReg: /^[^.]+/, // Select all file title data before the "."
+    connectionInsertionTitleRegex: /^connections?$/i,
     /**
      * Guidelines:
      * - Specific file title characteristics that the algorithm should use to classify the files pointed as connections
@@ -139,22 +140,30 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
          /** @type {import('./TraceabilityPipeline.js').linkTypeMap} */
         const currentClassificationMap = new Map();
             // 4. Find the artifact path
+            console.log(`DEBUG: artifact being searched ${artifact}`) //uncoment to debug
             const currentArtifactPath = ts.findArtifactFile(artifact, dirsAndFileMap.files, CONFIG.fileTitleIdentifierFilteringRegex, CONFIG.fileNameFilterRegex )
-            
+            console.log(`DEBUG: Path of artifact being returned: ${currentArtifactPath}`) //uncoment to debug
             //Get ready for 3 state data
             const fileLinksWithType = ts.buildFileLinks(currentArtifactPath) ;
-
+            console.log(`DEBUG: File links with type being returned: ${JSON.stringify(fileLinksWithType)}. !!MORE TESTING REQUIRED!!`) //uncoment to debug
             const pastRefsLinks = ts.buildRefsLinks(artifact, synapsePastStateObj)
+            console.log(`DEBUG: File links with type being returned: ${JSON.stringify(pastRefsLinks)}. `) //uncoment to debug
 
+
+            //CHECK TEMP: what am i trying to iterate overç
+            console.log(`DEBUG: Artifact connections list: ${JSON.stringify(artifactRelatedToFiles)}. `) //uncoment to debug
             const currentRefsLinks =  ts.buildRefsLinks(artifact, artifactRelatedToFiles)
 
             // Classify with the 3 state data
             ts.classifyAndConquerHard(currentClassificationMap,fileLinksWithType, pastRefsLinks, currentRefsLinks)
 
-            ts.classifyAndConquerDynamic(currentClassificationMap)
+            console.log(`DEBUG: Relations being passed a siterable: ${JSON.stringify(artifactRelatedToFiles[artifact])}. `) //uncoment to debug
+            ts.classifyAndConquerDynamic(currentClassificationMap, artifactRelatedToFiles[artifact], CONFIG.classificationGuidelines, CONFIG.fileTitleIdentifierFilteringRegex  )
 
+            
             //5. Access the artifact connections and classify them
             // DEPRACATE: const currentArtifactClassifiedConnections = ts.classifyArtifactConnections(artifactRelatedToFiles[artifact], CONFIG.classificationGuidelines, CONFIG.fileIdentifierNoNumFilteringRegex, CONFIG.fileExtensionExtractionRegex, CONFIG.acceptedSystemArtifacts )
+
 
             /** 6. Build a markdown table:
              *  - Determine wheather the artifact selected should have header or not
@@ -163,32 +172,23 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
 
             const identifierNoNum = artifact.match(CONFIG.fileIdentifierNoNumNorProjectRegex)?.[0]; // Useful data for step 6 and 7
 
-            let connectionMDTable = ''; //Stores the connection data ready to append to the artifact
+            
+            if(identifierNoNum && CONFIG.acceptedSystemArtifacts.includes(identifierNoNum)){
 
-            if(identifierNoNum){
+                const connectionMDTable = ts.buildASTMarkdownConnectionTable(currentClassificationMap, currentArtifactPath, CONFIG.fileTitleAvoidExtensionReg );
+                ts.writeASTConnectionsToArtifact(currentArtifactPath, connectionMDTable ,CONFIG.connectionInsertionTitleRegex )
                 
-                if(CONFIG.markdownHeaderGuidelines.noHeader.includes(identifierNoNum)){
-                    connectionMDTable = ts.buildMarkdownConnectionTable(false, currentArtifactClassifiedConnections, currentArtifactPath, CONFIG.fileTitleAvoidExtensionReg);
-                }
-                else if(CONFIG.markdownHeaderGuidelines.header.includes(identifierNoNum)){
-                    connectionMDTable = ts.buildMarkdownConnectionTable(true, currentArtifactClassifiedConnections, currentArtifactPath, CONFIG.fileTitleAvoidExtensionReg);
-                }
-                else{
+            }
+            else{
                     throw new Error(`Invalid identifier ${identifierNoNum} not part of system artfacts ${JSON.stringify(CONFIG.acceptedSystemArtifacts)}` )}
             }
-            else { 
-                throw new Error(`No valid artifact found in the key ${artifact} from object ${JSON.stringify(artifactRelatedToFiles)}`);
-            }
+            
 
-            // 7. Access and Modify the artifact file updating successfully the connections
-            ts.writeConnectionsToArtifact(identifierNoNum, currentArtifactPath, connectionMDTable);
-        }
+            
+        
     }
     catch (error) {
-        console.error('❌ FATAL ERROR in Main Thread:');
-        console.error(error.message);
-
-        throw error
+        console.error('❌ FATAL ERROR in Main Thread:', error);
         process.exit(1); // Fail the execution thread cleanly
     }
 
