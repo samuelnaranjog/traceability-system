@@ -38,7 +38,7 @@ const artifactCategoryMap = createCategoryLookupMap({
 const extensionCategoryMap = createCategoryLookupMap({
   '⚙️ Core Logic (Backend/Systems)': ["js"],
   '🎨 Client Layer (Frontend/UI)': ["py"],
-  '🛡️ Verification (Tests & Config)': [],
+  '🛡️ Verification (Tests & Config)': ["test.js"],
 });
 
 
@@ -61,7 +61,7 @@ const CONFIG = {
     fileNameFilterRegex: /(?<=_)[a-zA-Z_]+/, //Regex for selecting the name based on the underscore "_" convention given to the file
     fileIdentifierNoNumFilteringRegex: /(?<=-)[A-Z]+(?=-)/, // Select only the artifact for TSO-REQ-001 it will extract "REQ"
     fileIdentifierNoNumNorProjectRegex: /\b[A-Z]+(?=-\d+)/, // Select only the artifact from "REQ-001" it will extract "REQ"
-    fileExtensionExtractionRegex: /(?<=\.)[a-z]+/, // Selects from a . to find the extension
+    fileExtensionExtractionRegex: /(?:\.([^./\\]+))?\.([^./\\]+)$/, // Extracts up to two file extensions from the end of a path (e.g., match[1]="test", match[2]="js" from "folder/app.test.js"), safely ignoring directories.
     fileTitleAvoidExtensionReg: /^[^.]+/, // Select all file title data before the "."
     connectionInsertionTitleRegex: /^connections?$/i,
     /**
@@ -137,17 +137,17 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
         for (const artifact of artifactsWithConnections) {
             
             // Classification Data Structure
-         /** @type {import('./TraceabilityPipeline.js').linkTypeMap} */
-        const currentClassificationMap = new Map();
+            /** @type {import('./TraceabilityPipeline.js').mapOfClassifiedLinks} */
+            const currentClassificationMap = new Map();
             // 4. Find the artifact path
             console.log(`DEBUG: artifact being searched ${artifact}`) //uncoment to debug
             const currentArtifactPath = ts.findArtifactFile(artifact, dirsAndFileMap.files, CONFIG.fileTitleIdentifierFilteringRegex, CONFIG.fileNameFilterRegex )
             console.log(`DEBUG: Path of artifact being returned: ${currentArtifactPath}`) //uncoment to debug
             //Get ready for 3 state data
             const fileLinksWithType = ts.buildFileLinks(currentArtifactPath) ;
-            console.log(`DEBUG: File links with type being returned: ${JSON.stringify(fileLinksWithType)}. !!MORE TESTING REQUIRED!!`) //uncoment to debug
+            console.log(`DEBUG: Hand Written File links from 'fileLinksWithType' being returned: ${JSON.stringify(Object.fromEntries(fileLinksWithType))}. !!MORE TESTING REQUIRED!!`) //uncoment to debug
             const pastRefsLinks = ts.buildRefsLinks(artifact, synapsePastStateObj)
-            console.log(`DEBUG: File links with type being returned: ${JSON.stringify(pastRefsLinks)}. `) //uncoment to debug
+            console.log(`DEBUG: Referential File links from 'pastRefsLinks' being returned: ${JSON.stringify(pastRefsLinks)}. `) //uncoment to debug
 
 
             //CHECK TEMP: what am i trying to iterate overç
@@ -158,8 +158,9 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
             ts.classifyAndConquerHard(currentClassificationMap,fileLinksWithType, pastRefsLinks, currentRefsLinks)
 
             console.log(`DEBUG: Relations being passed a siterable: ${JSON.stringify(artifactRelatedToFiles[artifact])}. `) //uncoment to debug
-            ts.classifyAndConquerDynamic(currentClassificationMap, artifactRelatedToFiles[artifact], CONFIG.classificationGuidelines, CONFIG.fileTitleIdentifierFilteringRegex  )
+            ts.classifyAndConquerDynamic(currentClassificationMap, artifactRelatedToFiles[artifact], CONFIG.classificationGuidelines, CONFIG.fileIdentifierNoNumFilteringRegex, CONFIG.fileExtensionExtractionRegex, CONFIG.acceptedSystemArtifacts)
 
+            console.log(`DEBUG: Classification Result of the Whole data: ${JSON.stringify(Object.fromEntries(currentClassificationMap))}. `) //uncoment to debug --> showS!!!!
             
             //5. Access the artifact connections and classify them
             // DEPRACATE: const currentArtifactClassifiedConnections = ts.classifyArtifactConnections(artifactRelatedToFiles[artifact], CONFIG.classificationGuidelines, CONFIG.fileIdentifierNoNumFilteringRegex, CONFIG.fileExtensionExtractionRegex, CONFIG.acceptedSystemArtifacts )
@@ -175,13 +176,18 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
             
             if(identifierNoNum && CONFIG.acceptedSystemArtifacts.includes(identifierNoNum)){
 
-                const connectionMDTable = ts.buildASTMarkdownConnectionTable(currentClassificationMap, currentArtifactPath, CONFIG.fileTitleAvoidExtensionReg );
-                ts.writeASTConnectionsToArtifact(currentArtifactPath, connectionMDTable ,CONFIG.connectionInsertionTitleRegex )
                 
+                const connectionMDTable = ts.buildASTMarkdownConnectionTable(currentClassificationMap, currentArtifactPath, CONFIG.fileTitleAvoidExtensionReg );
+                const result = ts.writeASTConnectionsToArtifact(currentArtifactPath, connectionMDTable ,CONFIG.connectionInsertionTitleRegex )
+                console.group(`📄 Markdown Result: ${currentArtifactPath}`);
+                console.log(result);
+                console.groupEnd();
+
             }
             else{
-                    throw new Error(`Invalid identifier ${identifierNoNum} not part of system artfacts ${JSON.stringify(CONFIG.acceptedSystemArtifacts)}` )}
+                    throw new Error(`Invalid identifier ${identifierNoNum} not part of system artfacts ${JSON.stringify(CONFIG.acceptedSystemArtifacts)}` )
             }
+        }
             
 
             

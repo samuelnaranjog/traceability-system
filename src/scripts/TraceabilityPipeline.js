@@ -86,6 +86,28 @@ class MultiClassification extends Error{
  */
  
 
+// STRUCTURES TO HOLD LINKS CLASSIFICATION 
+  /**
+     * @typedef {object} dataLink
+     * @property {string} link - The url of the file
+     * @property {string} linkName - The defined name by the user for the link or fallback "Unnamed Link"
+     * @property {boolean} isHand -  'true' if the the link is hand written, 'false' otherwise
+     * 
+     */
+
+const FALLBACK_LINK_NAME = 'Unnamed Link';
+
+    /**  @typedef {Map<classification, dataLink[]>}  mapOfClassifiedLinks*/
+
+    /** @typedef {Map<classification, link[]>} linkTypeMap */ 
+
+    /**
+     * @typedef {object} classificationAndLinkData 
+     * @property {string} classification - Where does the link belongs
+     * @property {string} linkName - The defined name by the user for the link or fallback "Unnamed Link"
+    */
+    /** @typedef {Map<link, classificationAndLinkData>} fileLinksMap */
+
 export default class TraceabilityPipeline{
 
     
@@ -422,22 +444,29 @@ export default class TraceabilityPipeline{
         return fileASTData;
     }
 
+    
+
     /**
      * @description Extract the file link from a file "# connections" section table 
      * @description Build a data structure, adding {Map<link, classification>}
      * @param {string} artifacFilePath - Absolute path to the artifact to scan
      * @returns {fileLinksMap} A data structure that map links and its type
      */
-    static buildFileLinks(artifacFilePath, linkAndClassificationMap) {
+    static buildFileLinks(artifacFilePath) {
         
+        console.log(`DEBUG: Running buildFileLinks!!!. `) //uncoment to debug 
+
         
 
-        // My map structure of type
-        /** @type  {fileLinksMap} */
-        const fileLinksMap = new Map();
         try {
 
+            // My map structure of type
+            /** @type  {fileLinksMap} */
+            const fileLinksMap = new Map();
+
             const fileASTData = this.parseAST(artifacFilePath);
+
+            console.log(`DEBUG: Parsed data for ${artifacFilePath} in buildFileLinks: ${JSON.stringify(fileASTData)} . `) //uncoment to debug 
 
             const CONNECTION_REGEX = /^connections?$/i
 
@@ -449,17 +478,26 @@ export default class TraceabilityPipeline{
 
                     if (nextSibling?.type !== 'table') return
 
+                    console.log(`DEBUG: Found table in data while reading AST data from file. The data of the table is! ${JSON.stringify(nextSibling.children)} `) //uncoment to debug 
+
                     const dataRows = nextSibling.children.slice(1);
 
                     for (const row of dataRows) {
                         if (row.type !== 'tableRow') continue;
-
+                        
                         const [categoryLabel, valueCell] = row.children;
+
+                        console.log(`DEBUG: Reading row columns ${JSON.stringify(categoryLabel)} & ${JSON.stringify(valueCell)} `) //uncoment to debug 
                         
                         const classification = toString(categoryLabel).trim()
+                        
+                        console.log(`DEBUG: Extract classification text:! ${classification}`) //uncoment to debug 
                         visit(valueCell, 'link', (node) =>{
-     
-                            fileLinksMap.set(node.url, classification);
+                            console.log(`AST data in the node:! ${JSON.stringify(node)}`) //uncoment to debug 
+                            console.log(`DEBUG: Extract url:! ${node.url}`) //uncoment to debug 
+                            const url = node.url
+                            const customLinkName = node.children?.[0]?.value ?? "Unnamed Link"
+                            fileLinksMap.set(url, {"classification": classification, "linkName": customLinkName});
                                 
                         })
 
@@ -490,7 +528,7 @@ export default class TraceabilityPipeline{
      */
     static buildRefsLinks(artifactName, data){
         /**@type {TraceableFile[]} */
-
+        
         //Handles the case where the artifact does not exist in the data or is the first run and there is not past data
         if (!(artifactName in data)) return;
 
@@ -503,34 +541,30 @@ export default class TraceabilityPipeline{
     }
     
     
-    /**
-     * @typedef {string} classification
-     * @typedef {string} link
-     */
-    /** @typedef {Map<classification, link[]>} linkTypeMap */ 
-
-    /** @typedef {Map<link, clasification>} fileLinksMap */
+  
 
     /**
-     * @description Classifies
-     * @param {linkTypeMap} currentClasificationMap 
+     * @description Mutates the currentClassificationMap 
+     * @param {mapOfClassifiedLinks} currentClassificationMap 
      * @param {fileLinksMap} fileLinksWithTypeMap 
      * @param {Set} pastRefsLinks 
      * @param {Set} currentRefsLinks 
+     * @returns {mapOfClassifiedLinks}
      */
-    static classifyAndConquerHard(currentClasificationMap, fileLinksWithTypeMap, pastRefsLinks, currentRefsLinks){
+    static classifyAndConquerHard(currentClassificationMap, fileLinksWithTypeMap, pastRefsLinks, currentRefsLinks){
         
-        /** @type {hardLinkMap}*/
-        const hardLinkClassifiedMap = currentClasificationMap;
+        /** @type {mapOfClassifiedLinks}*/
+        const hardLinkClassifiedMap = currentClassificationMap;
 
-        const fileLinks = Object.keys(fileLinksWithTypeMap)
+        const fileLinks = Array.from(fileLinksWithTypeMap.keys())
+        console.log(`DEBUG: In 'classifyAndConquerHard' iterable of links for comparison: ${JSON.stringify(fileLinks)}. `) //uncoment to debug
         for(const link of fileLinks){
             // The link data must be sets
             // inRp = in past reference artifact set
             // inRc = in current reference artifact set
 
-            const inRp = pastRefsLinks.has(link);
-            const inRc = currentRefsLinks.has(link);
+            const inRp = pastRefsLinks?.has(link) || false;
+            const inRc = currentRefsLinks?.has(link) || false;
             
             // HARD LINK case
             // Get the specific link classification and add it to the classify data structure
@@ -538,17 +572,17 @@ export default class TraceabilityPipeline{
             if (!inRc && !inRp){
 
                 /** 
-                 * @type {Object}
-                 * @property {string} classification
-                 * @property {string} url
+                 * @type {classificationAndLinkData}
                 */
                 const objHard = fileLinksWithTypeMap.get(link)
 
+                console.log(`DEBUG: In 'classifyAndConquerHard' hard link object: ${JSON.stringify(objHard)}. `) //uncoment to debug
+
                 if(hardLinkClassifiedMap.get(objHard.classification)){
-                    hardLinkClassifiedMap.get(objHard.classification).push(objHard.link)
+                    hardLinkClassifiedMap.get(objHard.classification).push({"link": link,"linkName": objHard.linkName, "isHand": true })
                 }
                 else{
-                    hardLinkClassifiedMap.set(objHard.classification, [objHard.link])
+                    hardLinkClassifiedMap.set(objHard.classification, [{"link": link,"linkName": objHard.linkName, "isHand": true }])
                 }
 
             }
@@ -560,18 +594,19 @@ export default class TraceabilityPipeline{
     }
 
      /**
-     * @param {linkTypeMap} currentClassification 
+     * @param {mapOfClassifiedLinks} currentClassificationMap 
      * @param {ArtifactRelatedFileConnection | TraceableFile[]} connectedFilesInput - The source data, a raw array of traceable files comming for a specific artifact key connections.
      * @param {classificationGuidelines} guidelines
      * @param {regexExtractor} fileArtifactIdentifierReg - Selects only the artifact e.g: ("PRO-REQ-001" will extract "REQ")
      * @param {regexExtractor} fileExtensionExtractionReg - Selects only the extension after the "."  e.g: ("myFile.test.js" will extract "test.js")
      * @param {Set<string>} systemArtifactsSet - Valid system artifacts list
-     * @returns {linkTypeMap} - Map with mutated classification
+     * @returns {mapOfClassifiedLinks} - Map with mutated classification
      */
-    static classifyAndConquerDynamic(currentClassification, connectedFilesInput, guidelines, fileArtifactIdentifierReg, fileExtensionExtractionReg, systemArtifactsSet) {
+    static classifyAndConquerDynamic(currentClassificationMap, connectedFilesInput, guidelines, fileArtifactIdentifierReg, fileExtensionExtractionReg, systemArtifactsSet) {
         //1. Abstract the logic of classification to be define outside in the main thread
         //2. Use a map of types like {hardlinkMap}
 
+        //console.log(`DEBUG: arguments passed to classifyAndConquerDynamic:`, currentClassificationMap, connectedFilesInput, guidelines, fileArtifactIdentifierReg, fileExtensionExtractionReg, systemArtifactsSet) //uncoment to debug
         
         connectedFilesInput.forEach( /** @param {TraceableFile} file */
     (file) => {
@@ -579,8 +614,10 @@ export default class TraceabilityPipeline{
             console.log(`DEBUG: Figuring out the file name to identify: ${file.name}. `) //uncoment to debug
             const artifactIdentifier = file.name.match(fileArtifactIdentifierReg)?.[0]; 
 
+            console.log(`DEBUG: Find the identifier: ${artifactIdentifier}. `) //uncoment to debug
+
             // ?: checks if the value exist else return undefined .[0] extracts the value
-            const extension = file.name.match(fileExtensionExtractionReg)?.[0]; 
+            const extension = file.name.match(fileExtensionExtractionReg); 
 
 
             /**
@@ -590,21 +627,24 @@ export default class TraceabilityPipeline{
 
             // Artifact classification guidelines
             const artifactCategoryMap = guidelines.artifactCategoryMap
-            const systemArtifactsSet = Object.keys(artifactCategoryMap);
             
 
             // Extension classification guidelines
             const extensionCategoryMap = guidelines.extensionCategoryMap;
 
             // 1. Check Artifact Identifier
-            if (artifactIdentifier && systemArtifactsSet.includes(artifactIdentifier)) {
+            if (artifactIdentifier) {
                 const artifactCategory = artifactCategoryMap.get(artifactIdentifier);
                 if (artifactCategory) classification.add(artifactCategory);
             }
 
             // 2. Check File Extension 
             if (extension) {
-                const extensionCategory = extensionCategoryMap.get(extension);
+                const singleExt = extension[2];
+                const doubleExt = extension[1] ? `${extension[1]}.${singleExt}` : null;
+
+                const extensionCategory = extensionCategoryMap.get(doubleExt) || extensionCategoryMap.get(singleExt);
+                
                 if (extensionCategory) classification.add(extensionCategory);
             }
 
@@ -622,21 +662,24 @@ export default class TraceabilityPipeline{
 
               const singleCategory = [...classification][0];
 
-              if(currentClasificationMap.get(singleCategory)){
-                    currentClasificationMap.get(singleCategory).push(file.path)
+             console.log('DEBUG:', { file: file.name, artifactIdentifier, extension, tag: singleCategory });  // uncoment to debug
+
+              if(currentClassificationMap.get(singleCategory)){
+                    currentClassificationMap.get(singleCategory).push({"link": file.path, "linkName": FALLBACK_LINK_NAME, "isHand": false  })
                 }
                 else{
-                    currentClasificationMap.set(singleCategory, [file.path])
+                    currentClassificationMap.set(singleCategory, [{"link": file.path, "linkName": FALLBACK_LINK_NAME, "isHand": false }])
                 }
               
             }
             catch(error){
-              console.error('Categorization critical identification uncapability');
-              throw error;
+              console.error('Categorization critical identification uncapability', error);
+              process.exit(1);
+              
             }
         })
 
-        return currentClassification
+        return currentClassificationMap
     }
 
     /**
@@ -723,13 +766,14 @@ export default class TraceabilityPipeline{
     }
 
     /**
-     * @param {classifyData} categorizedData - An object with the table **areas** and respective files classified in that area
+     * @param {mapOfClassifiedLinks} categorizedData - A Map with the table **areas** calssification and respective link data objects in that area
      * @param {string} artifactPath - The path of the artifact where connections are being categorized
      * @param {regexExtractor} fileAvoidExtensionReg - Selects only the name avoiding any data  after the "."  e.g: ("myFile.js" will avoid ".js")
      * @returns {Object} The AST Object table ready to embeded that creates a markdown table when stringify and render by a markdown engine
      */
 
     static buildASTMarkdownConnectionTable(categorizedData, artifactPath, fileAvoidExtensionReg) {
+        console.log('IS RUNNING???')
         try {
 
             const artifactDir = path.dirname(artifactPath);
@@ -749,14 +793,30 @@ export default class TraceabilityPipeline{
                 ]
             } //How should the header look like
 
+            const mapEntries = Array.from(categorizedData.entries());
+            // Sort in order the way the table is build
+            mapEntries.sort((a, b) => {
+    // a[0] and b[0] represent the 'key' (the Type) in the [key, value] pair
+    const cleanKeyA = a[0].replace(/\*\*/g, '').replace(/[^\x00-\x7F]/g, '').trim().toLowerCase();
+    const cleanKeyB = b[0].replace(/\*\*/g, '').replace(/[^\x00-\x7F]/g, '').trim().toLowerCase();
+    
+    if (cleanKeyA < cleanKeyB) return -1;
+    if (cleanKeyA > cleanKeyB) return 1;
+    return 0;
+});
+
+
+            // where the iretation starts Object.entries(categorizedData)
+            console.log(`DEBUG: The iterable array: ${JSON.stringify(Array.from(categorizedData.entries()))}, One sort ; ${JSON.stringify(mapEntries)}. `) //uncoment to debug
+
             // Table To insert
-            for (const [key, arrayOfObjects] of Object.entries(categorizedData)) {
+            for (const [key, arrayOfUrls] of categorizedData) {
                 /**
                 * @type {string} key - Is the category on which a collection of traceableFiles[] are clasified
                 * @type {TraceableFile[]} arrayOfObjects
                 */
 
-                if (Array.isArray(arrayOfObjects) && arrayOfObjects.length === 0) continue; // Skips empty connections in classification categories
+                if (Array.isArray(arrayOfUrls) && arrayOfUrls.length === 0) continue; // Skips empty connections in classification categories
 
                 
                 //Insert key (classification) with strong
@@ -790,40 +850,46 @@ export default class TraceabilityPipeline{
                 
 
                 // Insert route or routes
-                arrayOfObjects.forEach(fileObj => {
-                    /**
-                     * @type {TraceableFile} fileObj
-                     */
-
-            
-                    // Find the relative path from artifact to the connected file
+                arrayOfUrls.forEach(url => {
                     
-                    const relativeFilePath = path.relative(artifactDir, fileObj.path);
 
-                    const nameWithoutExtension = fileObj.name.match(fileAvoidExtensionReg)?.[0];
-                    if (!nameWithoutExtension) return;
+                    console.log(`DEBUG: within for each of buildASTMarkdownConnectionTable, iterating over : ${JSON.stringify(url)}. `) //uncoment to debug
+                    let newLink;
 
-
-
+                    // Determine if hand or dynamic 
+                    if(url.isHand){
                         // Insert the second column
-                        const newLink = {
+                        newLink = {
+                            "type": "link",
+                            "url": `${url.link}`,
+                            "title": null,
+                            "children": [
+                                { "type": "text", "value": `${url.linkName}` }]
+                        }
+                    }else if(!url.isHand){
+                        // Find the relative path from artifact to the connected file
+                        const relativeFilePath = path.relative(artifactDir, url.link);
+                        const nameWithoutExtension = path.basename(url.link).match(fileAvoidExtensionReg)?.[0] || path.basename(url.link);
+                        
+                        newLink = {
                             "type": "link",
                             "url": `${relativeFilePath}`,
                             "title": null,
                             "children": [
                                 { "type": "text", "value": `${nameWithoutExtension}` }]
                         }
+                    }
 
-                        const newBR = { type: 'html', value: '<br />' };
+                    const newBR = { type: 'html', value: '<br />' };
 
-                        if (secondCellChildren.length > 0) {
-                            secondCellChildren.push({ type: 'html', value: '<br />' });
-                        }
+                    if (secondCellChildren.length > 0) {
+                        secondCellChildren.push({ type: 'html', value: '<br />' });
+                    }
 
-                        secondCellChildren.push(newLink);
+                    secondCellChildren.push(newLink);
                         
 
-
+                       
                     
                 })
 
@@ -831,6 +897,8 @@ export default class TraceabilityPipeline{
 
                 // Assign the children of the cell 
                 newRow.children[SECOND_COLUMN_INDEX].children = secondCellChildren;
+
+                 console.log(`DEBUG: The row being build by buildASTMarkdownConnectionTable : ${JSON.stringify(newRow)}. `) //uncoment to debug
 
                 dynamicTable.children.push(newRow);
 
@@ -840,7 +908,7 @@ export default class TraceabilityPipeline{
             return dynamicTable;
 
         } catch (error) {
-            console.error(`Fail insert the table in the AST object`, error.message);
+            console.error(`Fail insert the table in the AST object`, error);
             process.exit(1)
         }
 
@@ -856,7 +924,15 @@ export default class TraceabilityPipeline{
      * @returns {string} updatedFile - The file with its previous content and the updated data, helpful data logic testing
      */
     static writeASTConnectionsToArtifact(artifactPath, astTable, connectionRegRule) {
-        console.log("DEBUG: Receiving artifact:", artifact);
+        const serializeAST = (astNode) => {
+        return String(
+    unified()
+      .use(remarkFrontmatter)
+      .use(remarkGfm)       
+      .use(remarkStringify) 
+      .stringify(astNode)
+  )};
+        console.log(`DEBUG: Receiving in writeASTConnectionsToArtifact :`, {Path: artifactPath, TableToInsert: serializeAST(astTable), sectionRule: connectionRegRule   });
 
         const CONNECTION_REGEX = connectionRegRule;
 
@@ -872,10 +948,10 @@ export default class TraceabilityPipeline{
                 const nextSibling = parent.children[SIBLING_INDEX];
 
                 if (nextSibling?.type === 'table') {
-                    parent.children[SIBLING_INDEX] = dynamicTable;
+                    parent.children[SIBLING_INDEX] = astTable;
                 }
                 else {
-                    parent.children.splice(SIBLING_INDEX, 0, dynamicTable)
+                    parent.children.splice(SIBLING_INDEX, 0, astTable)
                 }
 
                 headerFound = true;
@@ -893,7 +969,7 @@ export default class TraceabilityPipeline{
         }
         else {
             // Update the file data
-            const updatedFile = remarkStringify(fileASTData) //Stringify puts properties and content back together
+            const updatedFile = serializeAST(fileASTData) //Stringify puts properties and content back together
 
             // Rewrite the file with the new content
             try {
