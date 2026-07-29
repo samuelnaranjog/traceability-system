@@ -1,4 +1,4 @@
-// @trace REQ-020 ADR-006 @
+// @trace REQ-020 ADR-006 ADR-009 @
 
 import path from 'node:path';
 import fs, { Dirent, readFileSync } from "node:fs";
@@ -16,7 +16,8 @@ import { visit } from 'unist-util-visit';
 import { toString } from 'mdast-util-to-string';
 
 // Built Methods
-import { findWorkTreePath } from './git-tree-workflow/GitWorkflowOperations.js';
+import { findWorkTreePath } from '../git-tree-workflow/GitWorkflowOperations';
+import LinkType from '../utils/ResolveLinkType';
 
 
 class DuplicateArtifact extends Error {
@@ -444,15 +445,44 @@ export default class TraceabilityPipeline{
         return fileASTData;
     }
 
-    
+    /**
+     * 
+     * @param {string} artifactFilePath 
+     * @param {string} link 
+     * @returns {string} If it was file link returns absolute path. If it was hand type returns unmodified link
+     */
+    static evaluateLinkRoute(artifactFilePath, link){
+        
+        try{
+        if(!LinkType.bypassFileSystem(link)){
+            //Handle the absolute path formating
+            //Extract just the folder where the artifact lives
+            const artifactFolder = path.dirname(artifactFilePath); 
+            
+
+            // Resolve the relative link against that folder
+            const absoluteSystemPath = path.resolve(artifactFolder, link);
+            return absoluteSystemPath;
+
+        }else{
+            return link
+        }
+    }
+    catch(error){
+        console.error('Fail to determine if links was relative path or hadn written:', error)
+    }
+
+        
+    }
+
 
     /**
      * @description Extract the file link from a file "# connections" section table 
      * @description Build a data structure, adding {Map<link, classification>}
-     * @param {string} artifacFilePath - Absolute path to the artifact to scan
+     * @param {string} artifactFilePath - Absolute path to the artifact to scan
      * @returns {fileLinksMap} A data structure that map links and its type
      */
-    static buildFileLinks(artifacFilePath) {
+    static buildFileLinks(artifactFilePath) {
         
         console.log(`DEBUG: Running buildFileLinks!!!. `) //uncoment to debug 
 
@@ -464,9 +494,9 @@ export default class TraceabilityPipeline{
             /** @type  {fileLinksMap} */
             const fileLinksMap = new Map();
 
-            const fileASTData = this.parseAST(artifacFilePath);
+            const fileASTData = this.parseAST(artifactFilePath);
 
-            console.log(`DEBUG: Parsed data for ${artifacFilePath} in buildFileLinks: ${JSON.stringify(fileASTData)} . `) //uncoment to debug 
+            console.log(`DEBUG: Parsed data for ${artifactFilePath} in buildFileLinks: ${JSON.stringify(fileASTData)} . `) //uncoment to debug 
 
             const CONNECTION_REGEX = /^connections?$/i
 
@@ -493,10 +523,15 @@ export default class TraceabilityPipeline{
                         
                         console.log(`DEBUG: Extract classification text:! ${classification}`) //uncoment to debug 
                         visit(valueCell, 'link', (node) =>{
-                            console.log(`AST data in the node:! ${JSON.stringify(node)}`) //uncoment to debug 
+                            //console.log(`AST data in the node:! ${JSON.stringify(node)}`) //uncoment to debug 
                             console.log(`DEBUG: Extract url:! ${node.url}`) //uncoment to debug 
-                            const url = node.url
+
+                            // ADR-009 Solve relative link duplication by building absolute path for realtive links
+                            
+                            const url = this.evaluateLinkRoute(artifactFilePath, node.url);
                             const customLinkName = node.children?.[0]?.value ?? "Unnamed Link"
+
+                            console.log(`DEBUG: 'buildFileLinks' set ${node.url} to: ${url}`) //uncoment to debug 
                             fileLinksMap.set(url, {"classification": classification, "linkName": customLinkName});
                                 
                         })
@@ -557,8 +592,10 @@ export default class TraceabilityPipeline{
         const hardLinkClassifiedMap = currentClassificationMap;
 
         const fileLinks = Array.from(fileLinksWithTypeMap.keys())
-        console.log(`DEBUG: In 'classifyAndConquerHard' iterable of links for comparison: ${JSON.stringify(fileLinks)}. `) //uncoment to debug
+        console.log(`DEBUG: In 'classifyAndConquerHard' about to define if this link are hand or not: ${JSON.stringify(fileLinks)}. `) //uncoment to debug
         for(const link of fileLinks){
+
+            console.log(`DEBUG: In 'classifyAndConquerHard' Analizing link: ${link}. `) //uncoment to debug
             // The link data must be sets
             // inRp = in past reference artifact set
             // inRc = in current reference artifact set
@@ -571,12 +608,14 @@ export default class TraceabilityPipeline{
                 
             if (!inRc && !inRp){
 
+                console.log(`DEBUG: In 'classifyAndConquerHard' Link was classified as hard: ${!inRc && !inRp}. `) //uncoment to debug
+
                 /** 
                  * @type {classificationAndLinkData}
                 */
                 const objHard = fileLinksWithTypeMap.get(link)
 
-                console.log(`DEBUG: In 'classifyAndConquerHard' hard link object: ${JSON.stringify(objHard)}. `) //uncoment to debug
+                //console.log(`DEBUG: In 'classifyAndConquerHard' hard link object: ${JSON.stringify(objHard)}. `) //uncoment to debug
 
                 if(hardLinkClassifiedMap.get(objHard.classification)){
                     hardLinkClassifiedMap.get(objHard.classification).push({"link": link,"linkName": objHard.linkName, "isHand": true })
@@ -607,14 +646,15 @@ export default class TraceabilityPipeline{
         //2. Use a map of types like {hardlinkMap}
 
         //console.log(`DEBUG: arguments passed to classifyAndConquerDynamic:`, currentClassificationMap, connectedFilesInput, guidelines, fileArtifactIdentifierReg, fileExtensionExtractionReg, systemArtifactsSet) //uncoment to debug
-        
+        console.log('DEBUG: *ClassifyAndConquerDynamic* This data is used to assign each file to a classification:', {connectedFilesInput});  // uncoment to debug
+
         connectedFilesInput.forEach( /** @param {TraceableFile} file */
     (file) => {
 
             console.log(`DEBUG: Figuring out the file name to identify: ${file.name}. `) //uncoment to debug
             const artifactIdentifier = file.name.match(fileArtifactIdentifierReg)?.[0]; 
 
-            console.log(`DEBUG: Find the identifier: ${artifactIdentifier}. `) //uncoment to debug
+            console.log(`DEBUG: Find the link identifier: ${artifactIdentifier}. `) //uncoment to debug
 
             // ?: checks if the value exist else return undefined .[0] extracts the value
             const extension = file.name.match(fileExtensionExtractionReg); 
@@ -662,7 +702,7 @@ export default class TraceabilityPipeline{
 
               const singleCategory = [...classification][0];
 
-             console.log('DEBUG:', { file: file.name, artifactIdentifier, extension, tag: singleCategory });  // uncoment to debug
+             console.log('DEBUG: *ClassifyAndConquerDynamic* about to add:', { file: file.name, artifactIdentifier, extension, tag: singleCategory });  // uncoment to debug
 
               if(currentClassificationMap.get(singleCategory)){
                     currentClassificationMap.get(singleCategory).push({"link": file.path, "linkName": FALLBACK_LINK_NAME, "isHand": false  })
@@ -807,7 +847,7 @@ export default class TraceabilityPipeline{
 
 
             // where the iretation starts Object.entries(categorizedData)
-            console.log(`DEBUG: The iterable array: ${JSON.stringify(Array.from(categorizedData.entries()))}, One sort ; ${JSON.stringify(mapEntries)}. `) //uncoment to debug
+            console.log(`DEBUG: The iterable array: ${JSON.stringify(Array.from(categorizedData.entries()))}, Once sort ; ${JSON.stringify(mapEntries)}. `) //uncoment to debug
 
             // Table To insert
             for (const [key, arrayOfUrls] of categorizedData) {
@@ -898,7 +938,7 @@ export default class TraceabilityPipeline{
                 // Assign the children of the cell 
                 newRow.children[SECOND_COLUMN_INDEX].children = secondCellChildren;
 
-                 console.log(`DEBUG: The row being build by buildASTMarkdownConnectionTable : ${JSON.stringify(newRow)}. `) //uncoment to debug
+                 //console.log(`DEBUG: The row being build by buildASTMarkdownConnectionTable : ${JSON.stringify(newRow)}. `) //uncoment to debug
 
                 dynamicTable.children.push(newRow);
 
@@ -985,6 +1025,26 @@ export default class TraceabilityPipeline{
 
         }
     }
+
+    /**
+     * 
+     * @param {ArtifactRelatedFileConnection} data - The current run system connection state snapshot 
+     * @param {string} filePath - The absolute path of the .synapse-state.json
+     * 
+     */
+    static writeJsonDataToFile(data, filePath){
+        try {
+            // Stringify 
+             const curratedData = JSON.stringify(data);
+
+              writeFileSync(filePath, curratedData);
+              console.log("[synapse] Successfully update the connections .synapse-state.json snapshot");
+              
+            } catch (error) {
+              console.error("[synapse] Fail to update the connections .synapse-state.json snapshot:", error);
+            }
+    }
 }
+
 
 

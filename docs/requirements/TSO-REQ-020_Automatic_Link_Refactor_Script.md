@@ -5,7 +5,7 @@ Project: TraceabilitySystem
 Description: A script that updates the links of code files trigger by a commit
 ---
 
-## Story
+# Story
 
 >[!abstract] User Story
 > `User type - Action - Output`
@@ -14,7 +14,9 @@ Description: A script that updates the links of code files trigger by a commit
 **I want to** avoid the friction and cognitive debt of having to switch files to create a connection to the reqs specially for those file that can not be linked by obsidian symlink folder, files outside of docs 
 **So that** there is no need to manually refactor of links when name or folder is change or need to think about the path to the file. This way I avoid the debt of having broken links across the traceability system
 
-## Acceptance Criteria
+# Acceptance Criteria
+
+
 > [!success] **Scenario:** Folder File Mapping
 > `Precondition - Action - Outcome`
 > 
@@ -25,6 +27,8 @@ Description: A script that updates the links of code files trigger by a commit
 > - [ ] Data from files is read and specific keyword **@trace** follow by artifact identifiers `REQ` `VS` `ADR` are scan till the keyword **@end**, making sure is a valid identifier from the list of identifiers and that it contains a number ID.
 > - [ ] If a match of this identifiers are found in one or more files an object for storage should contain the **identifier properties:** REQ, ADR and VS followed by an array that adds the path of the file to this section if found
 > - [ ] If the folder contains more directories this process should be repeated for directories find in the root directory and directories of directories find within those **without loosing**g any data!!
+
+## Builds artifact and connection reference
 
  >[!success] **Scenario:** Regex Expression Extraction & filtering
 > `Precondition - Action - Outcome`
@@ -74,28 +78,43 @@ Description: A script that updates the links of code files trigger by a commit
 > 4. Inject or update this table within the specific artifact Markdown file without altering the surrounding content.
 
 ### Hand Written Links
-> [!todo] **Scenario:** Handling hand written links with hand written table & system first run
+> [!success] **Scenario:** Handling hand written links with hand written table & system first run
 > `Precondition - Action - Outcome`
 > 
 > **Given** 
 > - the `artifact` has a hand written links within a table of two columns `Type` & `Route`, which in its row has a valid type of the preconfigured classifications in the `system-config-json` and in the route a link corresponding to that classification. 
-> - No past state snapshot json as been created: `.synapse-state.json`
+> - No past state snapshot json has been created: `.synapse-state.json`
 > - Some Dynamic Connection in a system file with `@trace` `@` is pointing to the artifact 
 > 
 >**When** the `synapse` engine is run.
 >**Then** the expected behavior is:
 > 1. The system should create the empty `.synapse-state.json`
-> 2. The system should preserve the file link in the proper classification
+> 2. The system should preserve the  link url in the proper classification
 > 3. the system should preserve the custom name in the link if present
+> 4. The system should preserve the dynamic connection that point using the keyword
 
+> [!todo] **Scenario:** Handling hand written links with hand written table & System >1 run
+> `Precondition - Action - Outcome`
+> 
+> **Given** 
+> - the `artifact` has a hand written links within a table of two columns `Type` & `Route`, which in its row has a valid type of the preconfigured classifications in the `system-config-json` and in the route a link corresponding to that classification. 
+> - A past state snapshot json has been created: `.synapse-state.json`
+> - Some Dynamic Connection in a system file with `@trace` `@` is pointing to the artifact 
+> 
+>**When** the `synapse` engine is run.
+>**Then** the expected behavior is:
+> 1. The system write successfully the system snapshot in `.synapse-state.json`
+> 2. The system should preserve the  link url in the proper classification
+> 3. the system should preserve the custom name in the link if present
+> 4. The system should preserve the dynamic connection that point using the keyword
 
 > [!todo] **Scenario:** Handling hand written links that survive in the connection table like prototypes to figma or others
 > `Precondition - Action - Outcome`
 > 
 > **Given** The System has collected the files and related them to the specific artifact which they reference , **When** the command `synapse` or the builder make a commit , **Then**
-> 4. It should extract the link from the connections table & identify which ones are hard links.
-> 5. It should Include the hard link in the refactored connections table 
-> 6. The hard link should be in the proper row where it was written. 
+> 5. It should extract the link from the connections table & identify which ones are hard links.
+> 6. It should Include the hard link in the refactored connections table 
+> 7. The hard link should be in the proper row where it was written. 
 
 > [!todo] **Scenario:** Self healing global project script
 > `Precondition - Action - Outcome`
@@ -104,10 +123,10 @@ Description: A script that updates the links of code files trigger by a commit
 
 ## Analytical Breakdown
 
-| **Problem Solving documentation** | **File**                                                                |
-| --------------------------------- | ----------------------------------------------------------------------- |
-| 2026-06-17                        | [TSO-REQ-020_Analytical_Breakdown](TSO-REQ-020_Analytical_Breakdown.md) |
-| 2026-07-21                        |                                                                         |
+| **Problem Solving documentation** | **File**                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| 2026-06-17                        | [TSO-REQ-020_Analytical_Breakdown](TSO-REQ-020_Analytical_Breakdown.md)     |
+| 2026-07-21                        | [TSO-REQ-020_Analytical_Breakdown_2](TSO-REQ-020_Analytical_Breakdown_2.md) |
 
 --- 
 ###### Links: 

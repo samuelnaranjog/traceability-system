@@ -2,8 +2,8 @@
 // This is the function that executes the system task
 
 import { config } from "node:process";
-import SearchAndDivide  from "./FileSelectionHelper.js";
-import ExtractDataAndMatch from "./PathExtractionHelper.js";
+import SearchAndDivide from "../utils/FileSelectionHelper.js";
+import ExtractDataAndMatch from "../utils/PathExtractionHelper.js";
 import ts from "./TraceabilityPipeline.js"
 import { match } from "node:assert";
 
@@ -80,11 +80,6 @@ const CONFIG = {
  * Data structures initialization
  */
 
-/** @type {import("./TraceabilityPipeline.js").TraceableFile} */
-/** @type {import("./TraceabilityPipeline.js").ArtifactRelatedFileConnection } */
-
-const artifactRelatedToFiles = {};
-
 /** @type {import("./TraceabilityPipeline.js").innerItem} */
 /** @type {import("./TraceabilityPipeline.js").DirectoryAndFileMap} */
  
@@ -115,7 +110,8 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
          * 2. Identify files with connections and map it related files:
          * - Populates artifactRelatedToFiles with the relationships and keys(system artifact identifier)
          */
-        ExtractDataAndMatch(dirsAndFileMap, artifactRelatedToFiles, CONFIG.treaceabilityKeyWords.start, CONFIG.treaceabilityKeyWords.end, CONFIG.acceptedSystemArtifacts  )
+
+        const artifactRelatedToFiles = ExtractDataAndMatch(dirsAndFileMap, CONFIG.treaceabilityKeyWords.start, CONFIG.treaceabilityKeyWords.end, CONFIG.acceptedSystemArtifacts  )
 
         /**
          * 3. Artifact with connection looping time:
@@ -145,15 +141,15 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
             console.log(`DEBUG: Path of artifact being returned: ${currentArtifactPath}`) //uncoment to debug
             //Get ready for 3 state data
             const fileLinksWithType = ts.buildFileLinks(currentArtifactPath) ;
-            console.log(`DEBUG: Hand Written File links from 'fileLinksWithType' being returned: ${JSON.stringify(Object.fromEntries(fileLinksWithType))}. !!MORE TESTING REQUIRED!!`) //uncoment to debug
+            console.log(`DEBUG: File links from artifact extracted by 'fileLinksWithType' being returned: ${JSON.stringify(Object.fromEntries(fileLinksWithType))}. !!MORE TESTING REQUIRED!!`) //uncoment to debug
             const pastRefsLinks = ts.buildRefsLinks(artifact, synapsePastStateObj)
-            console.log(`DEBUG: Referential File links from 'pastRefsLinks' being returned: ${JSON.stringify(pastRefsLinks)}. `) //uncoment to debug
+            console.log(`DEBUG: Referential File links from 'pastRefsLinks' being returned: ${pastRefsLinks? JSON.stringify([...pastRefsLinks]) : pastRefsLinks}. `) //uncoment to debug
 
 
             //CHECK TEMP: what am i trying to iterate overç
-            console.log(`DEBUG: Artifact connections list: ${JSON.stringify(artifactRelatedToFiles)}. `) //uncoment to debug
+            //console.log(`DEBUG: Artifact connections list: ${JSON.stringify(artifactRelatedToFiles)}. `) //uncoment to debug
             const currentRefsLinks =  ts.buildRefsLinks(artifact, artifactRelatedToFiles)
-
+            console.log(`DEBUG: Referential File links from 'currentRefsLinks' being returned: ${JSON.stringify([...currentRefsLinks])}. `) //uncoment to debug
             // Classify with the 3 state data
             ts.classifyAndConquerHard(currentClassificationMap,fileLinksWithType, pastRefsLinks, currentRefsLinks)
 
@@ -188,10 +184,10 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
                     throw new Error(`Invalid identifier ${identifierNoNum} not part of system artfacts ${JSON.stringify(CONFIG.acceptedSystemArtifacts)}` )
             }
         }
-            
 
-            
-        
+        // Update the connections .synapse-state.json snapshot
+        ts.writeJsonDataToFile(artifactRelatedToFiles, synapsePath);
+
     }
     catch (error) {
         console.error('❌ FATAL ERROR in Main Thread:', error);

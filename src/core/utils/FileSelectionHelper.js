@@ -8,7 +8,7 @@ import path from "node:path";
  * 
  * @param {string} folderPath - Must be the path of the folder over which the files must be scan and mapped be perform
  * @param {string[]} excludeList - Files that shouldn't be stored
- * @param {import("./TraceabilityPipeline").DirectoryAndFileMap} mapOfDirsAndFilesObj 
+ * @param {import("./synapse-engine/TraceabilityPipeline").DirectoryAndFileMap} mapOfDirsAndFilesObj 
  */
 
 export default function SearchAndDivide(folderPath, excludeList, mapOfDirsAndFilesObj) {
