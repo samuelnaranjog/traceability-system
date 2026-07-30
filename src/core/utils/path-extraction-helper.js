@@ -1,4 +1,4 @@
-// @trace REQ-020 @ 
+// @trace REQ-020 ADR-009 @ 
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,7 +28,7 @@ export default function ExtractDataAndMatch(itemsObj, regexStart, regexEnd, acce
     const artifactIdentifierRegex = /\b[A-Z]+/g; // Extracts only the *artifact identifier*, later is compare to the valid artifact in the system
 
 
-  itemsObj.files.forEach(file => {
+  itemsObj.files?.forEach(file => {
 
     
 

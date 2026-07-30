@@ -1,7 +1,7 @@
 // @trace  REQ-020 ADR-003 VS-006 @
 
 import { SearchAndDivide } from "./FileSelectionHelper.js";
-import ExtractDataAndMatch from "./utils/PathExtractionHelper.js";
+import ExtractDataAndMatch from "./utils/path-extraction-helper.js";
 import path from "node:path";
 import fs, { readdirSync, readFileSync } from "node:fs";
 import matter from "gray-matter";

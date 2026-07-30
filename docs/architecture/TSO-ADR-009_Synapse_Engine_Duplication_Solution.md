@@ -24,12 +24,13 @@ When the system has already build some dynamic tables of relative links, it coll
 > | **⚙️ Core Logic (Backend/Systems)** | [pipeline](../../src/core/pipeline.js)<br />[pipeline](../../src/core/pipeline.js)<br />[pipeline](../../src/core/pipeline.js)<br />[pipeline](../../src/core/pipeline.js)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 > |                                     |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 > 
-
-**Another duplication source**
-After analyzing the code base the reader of keyword in the project files can create duplicates if the artifact is mention multiple time in the same `@trace block @` 
-
+> 
+> **Another duplication source**
+> While tracing down the data flow I realize that the ExtractAndMatch utility that generates the connections based on the artifact mention in the project files could create duplicates if the artifact is mention multiple time in the same `@trace block @` or if multiple `@trace block @` are present with the same artifact mention.
+> 
 >  ## ***Propose Design***
-> ### ==Convert the relative path to absolute==
+>  ### File hand written links approach
+> #### ==Convert the relative path to absolute==
 > Take the artifact path and from it rebuild the absolute system path of the link ready for comparison.
 > 
 > The problem is that it will need me to handle some edge cases that are not system paths, that need to be address so that the app does not crash, such as:
@@ -37,11 +38,11 @@ After analyzing the code base the reader of keyword in the project files can cre
 > - Handling links to the web
 > - others....
 > 
-> ### ==Use the name of the file==
+> #### ==Use the name of the file==
 > Another approach could be to use the name of the file to determine if is a dynamic link, per the system constraint dynamic links `link name` section is the file name without extension, so if the relalitive and link name are the same then it should be transform to absolute path
-
-### Modify the ExtractAndMatch Utility
-
+> 
+> ### ==Modify the ExtractAndMatch Utility==
+> The utility must be redesign to be cleaner and bulletproof to duplication
 >  
 >  
 >   #  **2. The Decision**
@@ -69,12 +70,18 @@ After analyzing the code base the reader of keyword in the project files can cre
 > ### New system behavior
 > The algorithm should include an enhance link modifier that can identify the possible types of links and determine if should be modified and refactor to absolute path or not.
 > 
+> ## extractAndMatch Utility redesign
+> Action required:
+> - Change the data structures being use from arrays to sets, transforming comparison to O(1).
+> - Integrate a record set that will be populated with the files that have already been scanned. This set will help you track the system scanner and skip any duplicated scans avoiding duplication and making the system more efficient
+> 
 > 
 >  # **3. The Consequences (Architectural Impact)**
 > ***Impact***
 > 
 > - Requires modification accross ==REQ-020== TraceabilityPipeline.js, specifically in the method that builds the file links map. 
 > - Requires the creation of a link reconstruction method that determines if the link should be modified or not and makes it an absolute path if required
+> - Redesign of the extractAndMatch util in the `path-extraction-helper`
 > 
 > ***Positive Effects***
 > 

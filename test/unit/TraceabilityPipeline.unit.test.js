@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import os from "os"
-import { mockTraceabilityData, mockTraceabilityDataDuplicates, classifiedConnections, fileADRMock, fileREQsOrVSMock, tableNoHeaderMock, tableHeaderMock} from "./TraceabilityPipelineMocks.js";
+import { mockTraceabilityData, mockTraceabilityDataDuplicates, classifiedConnections, fileADRMock, fileREQsOrVSMock, tableNoHeaderMock, tableHeaderMock} from "../../src/core/TraceabilityPipelineMocks.js";
 import runTraceabilityPipeline from "./AutoLinkRefactorExecutionThread.js";
-import GitWorkflowOperations from "./git-tree-workflow/GitWorkflowOperations.js";
+import GitWorkflowOperations from "../../src/core/git-tree-workflow/GitWorkflowOperations.js";
 import { jest } from '@jest/globals';
 
 describe("[synapse] Engine runs without compiler level errors ", () => {

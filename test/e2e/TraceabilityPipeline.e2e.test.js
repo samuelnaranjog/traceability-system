@@ -6,270 +6,184 @@ import os from "os"
 import runTraceabilityPipeline from "../../src/core/synapse-engine/AutoLinkRefactorExecutionThread.js";
 import GitWorkflowOperations from "../../src/core/git-tree-workflow/GitWorkflowOperations.js";
 import { jest } from '@jest/globals';
+import { MOCK_FILES } from "../utils/project-files-data.mock.js";
 
 import getCanonicalPath from "../utils/MultiSystemTempPathResolver.js";
 
 
 describe("[synapse] Engine runs without compiler level errors ", () => {
-  
+let mockRootDir;
+   beforeEach(async () => {
+       // 1. Create the isolated sandbox
+       mockRootDir = await fs.mkdtemp(path.join(os.tmpdir(), "mock-project-"));
+       
+       // 2. FORCE the Git operations to use the sandbox instead of the real repo
+       jest
+         .spyOn(GitWorkflowOperations, "findWorktreePath")
+         .mockReturnValue(mockRootDir);
+   
+       // 2. Define the tree structure
+       const directories = [
+         "docs/architecture",
+         "docs/comparisons",
+         "docs/requirements",
+         "prototypes",
+         "src/core",
+         "src/ui",
+         "tests",
+       ];
+   
+       for (const dir of directories) {
+         await fs.mkdir(path.join(mockRootDir, dir), { recursive: true });
+       }
+   
+       // 3. Define Inner File Data exactly as modeled in image_947732.png + REQ-002 updates
+   
+       // PRO-ADR-001_Microkernel.md (Traces REQ-001 & REQ-002)
+       const adr001Content = MOCK_FILES["docs/architecture/PRO-ADR-001_Microkernel.md"]
+   
+       // PRO-REQ-001_Create_Data.md (Traces ADR-001)
+       const req001Content = MOCK_FILES["docs/requirements/PRO-REQ-001_Create_Data.md"]
+   
+       // 4. Connect the peripheral files using the @trace tag and description blocks
+   
+       // Files connecting to ADR-001 & REQ-002
+       const pipelineJsContent = MOCK_FILES["src/core/pipeline.js"];
+   
+       const pocContent = MOCK_FILES["prototypes/01_proof_of_concept.py"];
+   
+       // Files connecting to REQ-001
+       const vsContent = MOCK_FILES["docs/comparisons/PRO-VS-002_GraphQL_VS_REST.md"];
+       const pipelineTestContent = MOCK_FILES["tests/pipeline.test.js"];
+   
+       // 5. Fill in the unconnected stub files & Hard-written link files
+       const req101Content = MOCK_FILES["docs/requirements/PRO-REQ-101_Data_Ingestion.md"];
+       const req002Content = MOCK_FILES["docs/requirements/PRO-REQ-002_Print_Money.md"]
+       
+       // PRO-ADR-002_Micro_Connection.md (Strictly using @trace syntax now)
+       const adr002Content = MOCK_FILES["docs/architecture/PRO-ADR-002_Micro_Connection.md"]; 
+   
+       const dashboardContent = MOCK_FILES["src/ui/dashboard.jsx"];
+       const readmeContent = MOCK_FILES["README.md"];
+   
+       // 6. Map paths to their respective contents
+       const files = {
+         "docs/architecture/PRO-ADR-001_Microkernel.md": adr001Content,
+         "docs/architecture/PRO-ADR-002_Micro_Connection.md": adr002Content, 
+         "docs/requirements/PRO-REQ-001_Create_Data.md": req001Content,
+         "docs/requirements/PRO-REQ-101_Data_Ingestion.md": req101Content,
+         "docs/requirements/PRO-REQ-002_Print_Money.md": req002Content, 
+         "docs/comparisons/PRO-VS-002_GraphQL_VS_REST.md": vsContent,
+         "prototypes/01_proof_of_concept.py": pocContent,
+         "src/core/pipeline.js": pipelineJsContent,
+         "src/ui/dashboard.jsx": dashboardContent,
+         "tests/pipeline.test.js": pipelineTestContent,
+         "README.md": readmeContent,
+       };
+   
+       // 7. Write everything to the temp directory
+       for (const [filePath, content] of Object.entries(files)) {
+         await fs.writeFile(path.join(mockRootDir, filePath), content);
+       }
+     });
+   
+     afterEach(async () => {
+       if (mockRootDir) {
+         await fs.rm(mockRootDir, { recursive: true, force: true });
+       }
+     }); 
 
-  let mockRootDir;
-
-  beforeAll(async () => {
-    // 1. Create the isolated sandbox
-    mockRootDir = await fs.mkdtemp(path.join(os.tmpdir(), "mock-project-"));
-    
-    // 2. FORCE the Git operations to use the sandbox instead of the real repo
-    jest
-      .spyOn(GitWorkflowOperations, "findWorktreePath")
-      .mockReturnValue(mockRootDir);
-
-    // 2. Define the tree structure
-    const directories = [
-      "docs/architecture",
-      "docs/comparisons",
-      "docs/requirements",
-      "prototypes",
-      "src/core",
-      "src/ui",
-      "tests",
-    ];
-
-    for (const dir of directories) {
-      await fs.mkdir(path.join(mockRootDir, dir), { recursive: true });
-    }
-
-    // 3. Define Inner File Data exactly as modeled in image_947732.png
-
-    // PRO-ADR-001_Microkernel.md (Traces REQ-001)
-    const adrContent = `---
-        Project: TraceabilitySystem
-        State: Approved
-        Priority: P0-Critical
-        Description:
-        ---
-        > [!info] 🏛️ TSO-ADR-002 : Symlinks
-        > **Date of Decision:** 2026-06-04
-        >
-        > ---
-        > ## *Connections*
-        >
-        >
-        > ---
-        > ## **1. The Context (Systemic Problem)**\`;
-        > @trace REQ-001 @
-        `;
-
-    // PRO-REQ-001_Create_Data.md (Traces ADR-001)
-    const req001Content = `---
-        Project: null
-        Status: null
-        Priority: null
-        Description: null
-        ---
-        # Connections
-
-        # Acceptance Criteria
-
-        ---
-        ###### Links:
-        @trace ADR-001 @
-        `;
-
-    // 4. Connect the peripheral files using the @trace tag
-
-    // Files connecting to ADR-001
-    const pipelineJsContent = `// Core Data Pipeline\n// @trace ADR-001 @\nexport const pipeline = () => {};\n`;
-    const pocContent = `# Proof of Concept Script\n# @trace ADR-001 @\nprint("Executing POC...")\n`;
-
-    // Files connecting to REQ-001
-    const vsContent = `# GraphQL VS REST\n\n@trace REQ-001 @\n\n## Connections\n`;
-    const pipelineTestContent = `// Pipeline Tests\n// @trace REQ-001 @\ntest('pipeline works', () => {});\n`;
-
-    // 5. Fill in the unconnected stub files
-    const req101Content = `# Data Ingestion\n`;
-    const req002Content = `# Print Money\n`;
-    const adr002Content = `# Micro Connection\n`; // Added ADR-002 stub
-    const dashboardContent = `export default function Dashboard() { return <div/>; }\n`;
-    const readmeContent = `# Mock Project\n`;
-
-    // 6. Map paths to their respective contents
-    const files = {
-      "docs/architecture/PRO-ADR-001_Microkernel.md": adrContent,
-      "docs/architecture/PRO-ADR-002_Micro_Connection.md": adr002Content, // Mapped ADR-002
-      "docs/requirements/PRO-REQ-001_Create_Data.md": req001Content,
-      "docs/requirements/PRO-REQ-101_Data_Ingestion.md": req101Content,
-      "docs/requirements/PRO-REQ-002_Print_Money.md": req002Content, // REQ-002 was already mapped here
-      "docs/comparisons/PRO-VS-002_GraphQL_VS_REST.md": vsContent,
-      "prototypes/01_proof_of_concept.py": pocContent,
-      "src/core/pipeline.js": pipelineJsContent,
-      "src/ui/dashboard.jsx": dashboardContent,
-      "tests/pipeline.test.js": pipelineTestContent,
-      "README.md": readmeContent,
-    };
-
-    // 7. Write everything to the temp directory
-    for (const [filePath, content] of Object.entries(files)) {
-      await fs.writeFile(path.join(mockRootDir, filePath), content);
-    }
-  });
-
-  // Optional: Clean up after the test suite finishes
-  afterAll(async () => {
-    if (mockRootDir) {
-      await fs.rm(mockRootDir, { recursive: true, force: true });
-    }
-  });
-
-  test("ARCH Notes connection test hidden as integration test", () => {
+  test("Running Synapse Engine through the main execution thread", () => {
     runTraceabilityPipeline(mockRootDir);
   });
 });
 
 
-describe("[Synapse engine] handles hard written links", () => {
-
-
+describe.only("[Synapse engine] handles hard written links", () => {
 
 let mockRootDir;
+   beforeEach(async () => {
+      jest.resetModules();
+       // 1. Create the isolated sandbox
+       mockRootDir = await fs.mkdtemp(path.join(os.tmpdir(), "mock-project-"));
+       
+       // 2. FORCE the Git operations to use the sandbox instead of the real repo
+       jest
+         .spyOn(GitWorkflowOperations, "findWorktreePath")
+         .mockReturnValue(mockRootDir);
+   
+       // 2. Define the tree structure
+       const directories = [
+         "docs/architecture",
+         "docs/comparisons",
+         "docs/requirements",
+         "prototypes",
+         "src/core",
+         "src/ui",
+         "tests",
+       ];
+   
+       for (const dir of directories) {
+         await fs.mkdir(path.join(mockRootDir, dir), { recursive: true });
+       }
+   
+       // 3. Define Inner File Data exactly as modeled in image_947732.png + REQ-002 updates
+   
+       // PRO-ADR-001_Microkernel.md (Traces REQ-001 & REQ-002)
+       const adr001Content = MOCK_FILES["docs/architecture/PRO-ADR-001_Microkernel.md"]
+   
+       // PRO-REQ-001_Create_Data.md (Traces ADR-001)
+       const req001Content = MOCK_FILES["docs/requirements/PRO-REQ-001_Create_Data.md"]
+   
+       // 4. Connect the peripheral files using the @trace tag and description blocks
+   
+       // Files connecting to ADR-001 & REQ-002
+       const pipelineJsContent = MOCK_FILES["src/core/pipeline.js"];
+   
+       const pocContent = MOCK_FILES["prototypes/01_proof_of_concept.py"];
+   
+       // Files connecting to REQ-001
+       const vsContent = MOCK_FILES["docs/comparisons/PRO-VS-002_GraphQL_VS_REST.md"];
+       const pipelineTestContent = MOCK_FILES["tests/pipeline.test.js"];
+   
+       // 5. Fill in the unconnected stub files & Hard-written link files
+       const req101Content = MOCK_FILES["docs/requirements/PRO-REQ-101_Data_Ingestion.md"];
+       const req002Content = MOCK_FILES["docs/requirements/PRO-REQ-002_Print_Money.md"]
+       
+       // PRO-ADR-002_Micro_Connection.md (Strictly using @trace syntax now)
+       const adr002Content = MOCK_FILES["docs/architecture/PRO-ADR-002_Micro_Connection.md"]; 
+   
+       const dashboardContent = MOCK_FILES["src/ui/dashboard.jsx"];
+       const readmeContent = MOCK_FILES["README.md"];
+   
+       // 6. Map paths to their respective contents
+       const files = {
+         "docs/architecture/PRO-ADR-001_Microkernel.md": adr001Content,
+         "docs/architecture/PRO-ADR-002_Micro_Connection.md": adr002Content, 
+         "docs/requirements/PRO-REQ-001_Create_Data.md": req001Content,
+         "docs/requirements/PRO-REQ-101_Data_Ingestion.md": req101Content,
+         "docs/requirements/PRO-REQ-002_Print_Money.md": req002Content, 
+         "docs/comparisons/PRO-VS-002_GraphQL_VS_REST.md": vsContent,
+         "prototypes/01_proof_of_concept.py": pocContent,
+         "src/core/pipeline.js": pipelineJsContent,
+         "src/ui/dashboard.jsx": dashboardContent,
+         "tests/pipeline.test.js": pipelineTestContent,
+         "README.md": readmeContent,
+       };
+   
+       // 7. Write everything to the temp directory
+       for (const [filePath, content] of Object.entries(files)) {
+         await fs.writeFile(path.join(mockRootDir, filePath), content);
+       }
+     });
+   
+     afterEach(async () => {
+      jest.restoreAllMocks();
 
-  beforeEach(async () => {
-    // 1. Create the isolated sandbox
-    mockRootDir = await fs.mkdtemp(path.join(os.tmpdir(), "mock-project-"));
-    
-    // 2. FORCE the Git operations to use the sandbox instead of the real repo
-    jest
-      .spyOn(GitWorkflowOperations, "findWorktreePath")
-      .mockReturnValue(mockRootDir);
-
-    // 2. Define the tree structure
-    const directories = [
-      "docs/architecture",
-      "docs/comparisons",
-      "docs/requirements",
-      "prototypes",
-      "src/core",
-      "src/ui",
-      "tests",
-    ];
-
-    for (const dir of directories) {
-      await fs.mkdir(path.join(mockRootDir, dir), { recursive: true });
-    }
-
-    // 3. Define Inner File Data exactly as modeled in image_947732.png + REQ-002 updates
-
-    // PRO-ADR-001_Microkernel.md (Traces REQ-001 & REQ-002)
-    const adrContent = `---
-Project: TraceabilitySystem
-State: Approved
-Priority: P0-Critical
-Description:
----
-> [!info] 🏛️ TSO-ADR-002 : Symlinks
-> **Date of Decision:** 2026-06-04
->
-> ---
-> ## *Connections*
-> Connection: Establishes the core plugin architecture and extension interfaces needed so that the execution logic in PRO-REQ-002 can safely run isolated modules.
->
-> ---
-> ## **1. The Context (Systemic Problem)**\`;
-> @trace REQ-001 @
-> @trace REQ-002 @
-        `;
-
-    // PRO-REQ-001_Create_Data.md (Traces ADR-001)
-    const req001Content = `---
-Project: null
-Status: null
-Priority: null
-Description: null
----
-# Connections
-
-# Acceptance Criteria
-
----
-###### Links:
-@trace ADR-001 @
-  `;
-
-    // 4. Connect the peripheral files using the @trace tag and description blocks
-
-    // Files connecting to ADR-001 & REQ-002
-    const pipelineJsContent = `// Core Data Pipeline
-// @trace ADR-001 @
-// @trace REQ-002 @
-// Connection: Implements the production JavaScript data orchestration pipeline, reading input streams generated by PRO-REQ-001 and executing the final logic defined in PRO-REQ-002.
-export const pipeline = () => {};
-`;
-
-    const pocContent = `# Proof of Concept Script
-# @trace ADR-001 @
-# @trace REQ-002 @
-# Connection: Acts as the standalone Python mathematical prototype validating the core algorithm before implementing the production rules outlined in PRO-REQ-002.
-print("Executing POC...")
-`;
-
-    // Files connecting to REQ-001
-    const vsContent = `# GraphQL VS REST\n\n@trace REQ-001 @\n\n## Connections\n`;
-    const pipelineTestContent = `// Pipeline Tests\n// @trace REQ-001 @\ntest('pipeline works', () => {});\n`;
-
-    // 5. Fill in the unconnected stub files & Hard-written link files
-    const req101Content = `# Data Ingestion\n`;
-    const req002Content = `# Print Money\n
----
-Project: null
-Status: null
-Priority: null
-Description: null
----
-# Connections
-
-# Acceptance Criteria
-
----
-###### Links:
-    `;
-    
-    // PRO-ADR-002_Micro_Connection.md (Strictly using @trace syntax now)
-    const adr002Content = `# Micro Connection\n
-Connection: Explicitly documents the socket communication protocol and real-time network throughput required to handle the transaction volume specified in PRO-REQ-002.
-
-@trace REQ-002 @
-`; 
-
-    const dashboardContent = `export default function Dashboard() { return <div/>; }\n`;
-    const readmeContent = `# Mock Project\n`;
-
-    // 6. Map paths to their respective contents
-    const files = {
-      "docs/architecture/PRO-ADR-001_Microkernel.md": adrContent,
-      "docs/architecture/PRO-ADR-002_Micro_Connection.md": adr002Content, 
-      "docs/requirements/PRO-REQ-001_Create_Data.md": req001Content,
-      "docs/requirements/PRO-REQ-101_Data_Ingestion.md": req101Content,
-      "docs/requirements/PRO-REQ-002_Print_Money.md": req002Content, 
-      "docs/comparisons/PRO-VS-002_GraphQL_VS_REST.md": vsContent,
-      "prototypes/01_proof_of_concept.py": pocContent,
-      "src/core/pipeline.js": pipelineJsContent,
-      "src/ui/dashboard.jsx": dashboardContent,
-      "tests/pipeline.test.js": pipelineTestContent,
-      "README.md": readmeContent,
-    };
-
-    // 7. Write everything to the temp directory
-    for (const [filePath, content] of Object.entries(files)) {
-      await fs.writeFile(path.join(mockRootDir, filePath), content);
-    }
-  });
-
-  // Optional: Clean up after the test suite finishes
-  afterAll(async () => {
-    if (mockRootDir) {
-      await fs.rm(mockRootDir, { recursive: true, force: true });
-    }
-  });
+       if (mockRootDir) {
+         await fs.rm(mockRootDir, { recursive: true, force: true });
+       }
+     }); 
 
     test("Hand Link Scenario A: Handles no '.synapse-state.json' in first run & Hard written link with manually created table", async () => {
         //  Define the exact path to REQ-002  & syanpse-state within the isolated sandbox
@@ -364,7 +278,7 @@ Description: Core value generation logic
         
     })
 
-    test.only("[Synapse engine] Handles 3 state comparsion with '.synapse-state.json', Dynamic & Hard written links added to dynamically created table", async () => {
+    test("[Synapse engine] Handles 3 state comparsion with '.synapse-state.json', Dynamic & Hard written links added to dynamically created table", async () => {
             runTraceabilityPipeline(mockRootDir);
 
              //  Define the exact path to REQ-002 within the isolated sandbox

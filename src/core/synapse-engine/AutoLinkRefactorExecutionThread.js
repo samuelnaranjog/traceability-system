@@ -3,7 +3,7 @@
 
 import { config } from "node:process";
 import SearchAndDivide from "../utils/FileSelectionHelper.js";
-import ExtractDataAndMatch from "../utils/PathExtractionHelper.js";
+import ExtractDataAndMatch from "../utils/path-extraction-helper.js";
 import ts from "./TraceabilityPipeline.js"
 import { match } from "node:assert";
 
@@ -76,17 +76,6 @@ const CONFIG = {
     
 };
 
-/**
- * Data structures initialization
- */
-
-/** @type {import("./TraceabilityPipeline.js").innerItem} */
-/** @type {import("./TraceabilityPipeline.js").DirectoryAndFileMap} */
- 
-const dirsAndFileMap = {
-    files: [],
-    dirs: [],
-};
 
 /**
  * The Main Execution Thread
@@ -98,20 +87,29 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
     console.log('🚀 Starting Traceability Pipeline...');
 
     try{
-    
+
+        // Data structures initialization
+
+    /** @type {import("../synapse-engine/TraceabilityPipeline.js").DirectoryAndFileMap} */
+ 
+    const dirsAndFileObj = {
+    files: [],
+    dirs: [],
+    };
+  
         /** 
          * 1. Map the files:
          * - Takes the data structure  dirsAndFileMap and populates it
          * - Stores the files avoiding the exclude list
          */
-        SearchAndDivide(vaultPath, CONFIG.excludeList, dirsAndFileMap); 
+        SearchAndDivide(vaultPath, CONFIG.excludeList, dirsAndFileObj); 
         
         /**
          * 2. Identify files with connections and map it related files:
          * - Populates artifactRelatedToFiles with the relationships and keys(system artifact identifier)
          */
 
-        const artifactRelatedToFiles = ExtractDataAndMatch(dirsAndFileMap, CONFIG.treaceabilityKeyWords.start, CONFIG.treaceabilityKeyWords.end, CONFIG.acceptedSystemArtifacts  )
+        const artifactRelatedToFiles = ExtractDataAndMatch(dirsAndFileObj, CONFIG.treaceabilityKeyWords.start, CONFIG.treaceabilityKeyWords.end, CONFIG.acceptedSystemArtifacts  )
 
         /**
          * 3. Artifact with connection looping time:
@@ -137,7 +135,7 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
             const currentClassificationMap = new Map();
             // 4. Find the artifact path
             console.log(`DEBUG: artifact being searched ${artifact}`) //uncoment to debug
-            const currentArtifactPath = ts.findArtifactFile(artifact, dirsAndFileMap.files, CONFIG.fileTitleIdentifierFilteringRegex, CONFIG.fileNameFilterRegex )
+            const currentArtifactPath = ts.findArtifactFile(artifact, dirsAndFileObj.files, CONFIG.fileTitleIdentifierFilteringRegex, CONFIG.fileNameFilterRegex )
             console.log(`DEBUG: Path of artifact being returned: ${currentArtifactPath}`) //uncoment to debug
             //Get ready for 3 state data
             const fileLinksWithType = ts.buildFileLinks(currentArtifactPath) ;
@@ -187,6 +185,11 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
 
         // Update the connections .synapse-state.json snapshot
         ts.writeJsonDataToFile(artifactRelatedToFiles, synapsePath);
+
+        // Clear data structures after all runned successfully
+        Object.keys(dirsAndFileObj).forEach(key => delete dirsAndFileObj[key]);
+        Object.keys(artifactRelatedToFiles).forEach(key => delete artifactRelatedToFiles[key]);
+        
 
     }
     catch (error) {

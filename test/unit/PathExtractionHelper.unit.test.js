@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import os from "os"
 import { jest } from '@jest/globals';
-import ExtractDataAndMatch from "../../src/core/utils/PathExtractionHelper";
+import ExtractDataAndMatch from "../../src/core/utils/path-extraction-helper.js";
 import SearchAndDivide from "../../src/core/utils/FileSelectionHelper.js";
 import GitWorkflowOperations from "../../src/core/git-tree-workflow/GitWorkflowOperations.js";
 import { MOCK_FILES } from "../utils/project-files-data.mock.js";
