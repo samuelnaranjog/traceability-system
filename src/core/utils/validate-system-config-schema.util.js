@@ -53,28 +53,36 @@ export function systemSchemaValidation(engineType, systemConfigObj, configName =
     classificationGuidelines: yup.object({
       artifactCategoryMap: artifactCategoriesSchema,
       extensionCategoryMap: artifactCategoriesSchema,
-    }),
-  });
+    }).required('classificationGuidelines' + CUSTOM_FEEDBACK),
+});
 
   const configSchemaSpawn = yup.object({
-    projectPrefix: yup.string().required(`"projectPrefix"`, CUSTOM_FEEDBACK)
+    projectPrefix: yup
+  .string()
+  .trim() 
+  .transform((value) => value?.toUpperCase())
+  .matches(/^[A-Z0-9]{3,5}$/, 'Project prefix must be 3 to 5 uppercase alphanumeric characters')
+  .required('projectPrefix' + CUSTOM_FEEDBACK)
   })
 
   try{
     if(engineType == "synapse-engine"){
-      configSchemaSynapse.validateSync(systemConfigObj.engineType, {
+      console.log('Try to validate using schema  ✔️')// to debug uncoment
+      configSchemaSynapse.validateSync(systemConfigObj[engineType], {
         abortEarly: false,
         strict: true })
     }
 
     if(engineType == "dev-workflow"){
-      configSchemaSpawn.validateSync(systemConfigObj.engineType, {
+      configSchemaSpawn.validateSync(systemConfigObj[engineType], {
         abortEarly: false,
         strict: true })
     }
   }
   catch(err){
+    console.log('HIT TROW')// to debug uncoment
     console.error(`${MASTER_CONFIG_NAME} validation of ${engineType} failed:`, err.errors);
+    throw new Error(err.errors);
   }
 }
 
