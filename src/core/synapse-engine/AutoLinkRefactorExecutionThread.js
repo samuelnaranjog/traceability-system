@@ -1,4 +1,4 @@
-// @trace REQ-020 @
+// @trace REQ-020 ADR-010 @
 // This is the function that executes the system task
 
 import { config } from "node:process";
@@ -6,6 +6,9 @@ import SearchAndDivide from "../utils/FileSelectionHelper.js";
 import ExtractDataAndMatch from "../utils/path-extraction-helper.js";
 import ts from "./TraceabilityPipeline.js"
 import { match } from "node:assert";
+import { createConfigFile } from "../utils/config-file-operations.util.js";
+import { validateConfigPresence } from "../utils/config-file-operations.util.js";
+import { parseFileAndCatch } from "../utils/parse-file-&-catch.js";
 
 // Project Root path
 import appRoot from "app-root-path";
@@ -87,6 +90,17 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
     console.log('🚀 Starting Traceability Pipeline...');
 
     try{
+
+        // System integrity status check
+        let [hasConfig, configPath] = validateConfigPresence(); 
+
+        if(!hasConfig) configPath = createConfigFile();
+
+        if(!configPath){
+            throw new Error ('The system config file does not exist or fail to resolve is path, please make sure is present');
+        }
+
+        systemConfigData = parseFileAndCatch(configPath);
 
         // Data structures initialization
 
