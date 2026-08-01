@@ -345,10 +345,11 @@ const extensionCategoryMap = createCategoryLookupMap({
 > **Given**the engine is run , **When** .... , **Then**
 - [x] Set up the centralized object with default values
 - [x] Create a util that handle the config creation for both systems
-- [ ] Validate the config presence
-- [ ] Add default config data if not config present
-- [ ] Validate the schema using yup for data presence
+- [x] Validate the config presence
+- [x] Add default config data if not config present
+- [x] Validate the schema using yup for data presence
 - [ ] if OK and the config JSON data to the **CONFIG**
+- [ ] Use the worktree method to extract the worktree path and run the synapse engine over it path to extract 
 
 # Excalidraw Data
 

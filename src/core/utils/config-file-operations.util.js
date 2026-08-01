@@ -1,6 +1,8 @@
-import { MASTER_CONFIG_NAME } from "./system-config.default";
-import { DEFAULT } from "./system-config.default";
-import { findWorkTreePath } from "../git-tree-workflow/GitWorkflowOperations";
+import { MASTER_CONFIG_NAME } from "./system-config.default.js";
+import { DEFAULT } from "./system-config.default.js";
+import GW from "../git-tree-workflow/GitWorkflowOperations.js";
+import { readdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
 
 /**
    * @Description Creates a config file in the worktree folder, of course only if run from a valid worktree or worktree subfolder
@@ -9,7 +11,7 @@ import { findWorkTreePath } from "../git-tree-workflow/GitWorkflowOperations";
 */
 export function createConfigFile(configName = MASTER_CONFIG_NAME) {
 
-    const worktreePath = findWorktreePath();
+    const worktreePath = GW.findWorktreePath();
     const newFilePath = path.join(worktreePath, configName);
     const configDefaultData = DEFAULT;
 
@@ -32,7 +34,7 @@ export function createConfigFile(configName = MASTER_CONFIG_NAME) {
 export function validateConfigPresence(configName = MASTER_CONFIG_NAME) {
   try{
     console.log("==== Validating config presence ====="); //to debug uncoment
-    const worktreeFolder = this.findWorktreePath();
+    const worktreeFolder = GW.findWorktreePath();
     const items = readdirSync(worktreeFolder, { withFileTypes: true });
     const files = items.filter((item) => item.isFile());
     console.log(
@@ -40,20 +42,23 @@ export function validateConfigPresence(configName = MASTER_CONFIG_NAME) {
     ); //to debug uncoment
 
     let foundPath = undefined;
-    let hasConfig;
-    const configFile = files.find((file) => file.name == configName);
+    let hasConfig = false;
+    const configFile = files.find((file) => file.name === configName);
     console.log(`Data extracted from config ${JSON.stringify(configFile)}`); //to debug uncoment
 
     if (configFile) {
+      console.log(`successfully indentify the cofnig presence`)
       hasConfig = true;
-      foundPath = path.join(configFile.path, configName);
+      foundPath = path.join(worktreeFolder, configName);
     } else {
       hasConfig = false;
     }
 
     return [hasConfig, foundPath];
+    
   }
-  catch{
+  catch(error){
     console.error(`Fail to find the expected config file: ${configName}`, error);
+    throw new Error('The config File is not present please created manually')
   }
 }

@@ -1,1 +1,44 @@
-{"gitWorkTreeScriptConfig":{"markdownEditorFolderPath":"/Users/s_n_gr/My Drive  .../OBSIDIAN/Projects/Traceability_System","projectPrefix":"tso"}}
+{
+  "synapse-engine": {
+    "excludeList": [
+      ".gitignore",
+      ".git",
+      ".DS_Store",
+      "node_modules",
+      "README.md",
+      "package-lock.json",
+      "package.json"
+    ],
+    "acceptedSystemArtifacts": [
+      "REQ",
+      "ADR",
+      "VS"
+    ],
+    "connectionInsertionTitleRegex": "connections",
+    "classificationGuidelines": {
+      "artifactCategoryMap": {
+        "📕 Architecture": [
+          "VS",
+          "ADR"
+        ],
+        "📓 Requirements": [
+          "REQ"
+        ]
+      },
+      "extensionCategoryMap": {
+        "⚙️ Core Logic (Backend/Systems)": [
+          "js"
+        ],
+        "🎨 Client Layer (Frontend/UI)": [
+          "jsx"
+        ],
+        "🛡️ Verification (Tests & Config)": [
+          "test.js"
+        ]
+      }
+    }
+  },
+  "dev-workflow": {
+    "projectPrefix": ""
+  }
+}

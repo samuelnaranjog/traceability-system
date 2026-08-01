@@ -11,6 +11,8 @@ import { MOCK_FILES } from "../utils/project-files-data.mock.js";
 import getCanonicalPath from "../utils/MultiSystemTempPathResolver.js";
 
 
+
+
 describe("[synapse] Engine runs without compiler level errors ", () => {
 let mockRootDir;
    beforeEach(async () => {

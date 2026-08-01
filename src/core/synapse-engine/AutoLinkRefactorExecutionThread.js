@@ -1,6 +1,9 @@
+#!/usr/bin/env node
+
 // @trace REQ-020 ADR-010 @
 // This is the function that executes the system task
-
+import url from 'url';
+import path from 'path';
 import { config } from "node:process";
 import SearchAndDivide from "../utils/FileSelectionHelper.js";
 import ExtractDataAndMatch from "../utils/path-extraction-helper.js";
@@ -9,6 +12,9 @@ import { match } from "node:assert";
 import { createConfigFile } from "../utils/config-file-operations.util.js";
 import { validateConfigPresence } from "../utils/config-file-operations.util.js";
 import { parseFileAndCatch } from "../utils/parse-file-&-catch.js";
+import buildSynapseWorkingData from "../utils/build-synapse-working-data.util.js";
+import { systemSchemaValidation } from "../utils/validate-system-config-schema.util.js";
+import { findWorkTreePath } from "../git-tree-workflow/GitWorkflowOperations.js";
 
 // Project Root path
 import appRoot from "app-root-path";
@@ -47,7 +53,7 @@ const extensionCategoryMap = createCategoryLookupMap({
 
 const CONFIG = {
     vaultPath: appRoot.path,
-    excludeList: [
+    excludeList: [ // TO DO: add this to the schema!!!
         ".gitignore",
         ".git",
         ".DS_Store",
@@ -80,27 +86,49 @@ const CONFIG = {
 };
 
 
-/**
- * The Main Execution Thread
- */
 
+
+// The Main Execution Thread
 
 /** @param {string} vaultPath - Must be the path of the folder over which the files must be scan and mapped be perform */
-export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* Default argument */){
+export default function runTraceabilityPipeline(vaultPath /* Default argument */){
     console.log('🚀 Starting Traceability Pipeline...');
 
     try{
 
         // System integrity status check
-        let [hasConfig, configPath] = validateConfigPresence(); 
+        /*let [hasConfig, configPath] = validateConfigPresence(); 
+        if (!hasConfig) createConfigFile()*/
 
-        if(!hasConfig) configPath = createConfigFile();
+        console.log('🔍 [DIAGNOSTIC] Starting validateConfigPresence() check...');
+let [hasConfig, configPath] = validateConfigPresence();
 
+console.log(`🔍 [DIAGNOSTIC] hasConfig value:`, hasConfig, `| Type: ${typeof hasConfig}`);
+console.log(`🔍 [DIAGNOSTIC] configPath value:`, configPath, `| Type: ${typeof configPath}`);
+
+if (!hasConfig) {
+  console.warn('⚠️ [DIAGNOSTIC TRIGGER] hasConfig evaluated to FALSE. About to run createConfigFile()!');
+  console.trace('🔍 [DIAGNOSTIC STACK TRACE] Stack trace leading to configuration creation:');
+  
+  configPath = createConfigFile();
+  
+  console.log(`✨ [DIAGNOSTIC] createConfigFile completed. Resulting configPath:`, configPath);
+} else {
+  console.log('✅ [DIAGNOSTIC PASSED] Configuration file verified on disk. Skipping creation.');
+}
         if(!configPath){
             throw new Error ('The system config file does not exist or fail to resolve is path, please make sure is present');
         }
 
-        systemConfigData = parseFileAndCatch(configPath);
+        const systemConfigData = parseFileAndCatch(configPath);
+
+        
+        const systemValidatedData = systemSchemaValidation("synapse-engine", systemConfigData)
+        console.log('DEBUG: systemValidatedData is:', systemValidatedData)
+        const CONFIG = buildSynapseWorkingData(systemValidatedData); //TODO Create here the configasigner
+
+
+
 
         // Data structures initialization
 
@@ -211,5 +239,20 @@ export default function runTraceabilityPipeline(vaultPath = CONFIG.vaultPath /* 
         process.exit(1); // Fail the execution thread cleanly
     }
 
+}
+
+// Prevents auto-execution during Jest test imports
+const isDirectCliInvocation = process.env.NODE_ENV !== 'test';
+
+if (isDirectCliInvocation) {
+  try {
+    const VAULT_PATH = findWorkTreePath();
+    console.log(`🚀 Initializing Traceability Pipeline at: ${VAULT_PATH}`);
+    runTraceabilityPipeline(VAULT_PATH);
+    console.log('✨ Traceability Pipeline executed successfully.');
+  } catch (error) {
+    console.error('❌ Pipeline execution failed:', error.message);
+    process.exit(1);
+  }
 }
 

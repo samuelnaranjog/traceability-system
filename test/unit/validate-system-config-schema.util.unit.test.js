@@ -68,9 +68,14 @@ const BASE_VALID_CONFIG = {
     );
   });
 
-  // --- 4. Step-by-Step Invalid Value Tests ---
+  // Step-by-Step Invalid Value Tests
   describe('Value Constraints & Format Rules', () => {
     const invalidValueCases = [
+       {
+        description: 'empty string within excludeList array',
+        mutate: (cfg) => { cfg[ENGINE_TYPE].excludeList = ["", "sdkj"]; },
+        expectedError: 'Exclude file must be a non-empty string',
+      },
       {
         description: 'empty acceptedSystemArtifacts array',
         mutate: (cfg) => { cfg[ENGINE_TYPE].acceptedSystemArtifacts = []; },

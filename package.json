@@ -10,7 +10,9 @@
 
       "spawn": "./src/scripts/git-tree-workflow/SpawnEngine.js",
 
-      "collapse": "./src/scripts/git-tree-workflow/CollapseEngine.js"
+      "collapse": "./src/scripts/git-tree-workflow/CollapseEngine.js",
+
+      "synapse": "./src/core/synapse-engine/AutoLinkRefactorExecutionThread.js"
 
    },
 

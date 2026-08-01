@@ -1,5 +1,6 @@
+// @trace REQ-020 @
 import * as yup from 'yup';
-import { MASTER_CONFIG_NAME } from './system-config.default';
+import { MASTER_CONFIG_NAME } from './system-config.default.js';
 
 const artifactCategoriesSchema = yup.lazy((value) => {
   // Ensure the input is a valid non-null object
@@ -25,30 +26,50 @@ const artifactCategoriesSchema = yup.lazy((value) => {
  * @param {string} engineType - The subproperty to check in the config
  * @param {object} systemConfigObj - The Parsed JSON of the config
  * @param {string} configName - Optional, for custom config name
+ * @returns {object} successfully validated data from the config engineType property 
  */
 export function systemSchemaValidation(engineType, systemConfigObj, configName = MASTER_CONFIG_NAME) {
   const CUSTOM_FEEDBACK = ` property is required, please add it in the ${configName} file within the ${engineType} property`;
 
   const configSchemaSynapse = yup.object({
+    excludeList: yup.array().of(yup.string().trim().required('Exclude file must be a non-empty string')),
     acceptedSystemArtifacts: yup
       .array()
+      .compact()
       .of(yup.string().trim().required('Artifact prefix must be a non-empty string'))
       .min(1, 'At least one system artifact prefix must be present (e.g., ["REQ", "ADR"])')
       .required('acceptedSystemArtifacts' + CUSTOM_FEEDBACK),
 
     connectionInsertionTitleRegex: yup
-      .string()
-      .trim()
-      .test('is-valid-regex', 'Must be a valid regular expression string', (value) => {
-        if (!value) return false;
-        try {
-          new RegExp(value); // Ensures it won't crash when your app compiles it
-          return true;
-        } catch {
-          return false; // Returns validation error if syntax is invalid (e.g. unclosed parenthesis)
-        }
-      })
-      .required('connectionInsertionTitleRegex' + CUSTOM_FEEDBACK),
+    .mixed()
+    .required(`connectionInsertionTitleRegex ${CUSTOM_FEEDBACK}`)
+    .test('is-valid-regex', 'Must be a valid string or regex pattern', (value) => {
+      if (!value) return false;
+      try {
+        new RegExp(value);
+        return true; // Validates string syntax safety
+      } catch {
+        return false; // Blocks invalid regex strings like "("
+      }
+    })
+    .transform((value) => {
+      if (typeof value !== 'string' || !value.trim()) return value;
+
+      const trimmed = value.trim();
+
+      // Case 1: User typed full slash-and-flag syntax -> "/^heading?$/i"
+      const slashMatch = trimmed.match(/^\/(.*)\/([gimsuy]*)$/);
+      if (slashMatch) {
+        return new RegExp(slashMatch[1], slashMatch[2]);
+      }
+
+      // Case 2: User typed a plain word ("connections") or pattern ("connections?")
+      // Automatically anchor with ^ and $ if not already present, and set case-insensitive flag ('i')
+      const pattern = `${trimmed.startsWith('^') ? '' : '^'}${trimmed}${trimmed.endsWith('$') ? '' : '$'}`;
+
+      return new RegExp(pattern, 'i');
+    }),
+
 
     classificationGuidelines: yup.object({
       artifactCategoryMap: artifactCategoriesSchema,
@@ -68,21 +89,36 @@ export function systemSchemaValidation(engineType, systemConfigObj, configName =
   try{
     if(engineType == "synapse-engine"){
       console.log('Try to validate using schema  ✔️')// to debug uncoment
-      configSchemaSynapse.validateSync(systemConfigObj[engineType], {
+      const validatedSynapseConfig = configSchemaSynapse.validateSync(systemConfigObj[engineType], {
         abortEarly: false,
-        strict: true })
+        stripUnknown: true
+      })
+
+      if(!validatedSynapseConfig) throw new Error("Couldn't get a valid value form the validation schema")
+
+        console.log('DEBUG: Data to return within systemSchemaValidation is :', validatedSynapseConfig)
+        return validatedSynapseConfig;
     }
 
     if(engineType == "dev-workflow"){
-      configSchemaSpawn.validateSync(systemConfigObj[engineType], {
+       const validatedSpawnConfig = configSchemaSpawn.validateSync(systemConfigObj[engineType], {
         abortEarly: false,
-        strict: true })
+        stripUnknown: true})
+
+        if(!validatedSpawnConfig) throw new Error("Couldn't get a valid value form the validation schema")
+
+        return validatedSpawnConfig;
     }
   }
   catch(err){
-    console.log('HIT TROW')// to debug uncoment
-    console.error(`${MASTER_CONFIG_NAME} validation of ${engineType} failed:`, err.errors);
-    throw new Error(err.errors);
+    
+    const errorMessage = Array.isArray(err.errors) 
+      ? err.errors.join('; ') 
+      : err.message;
+
+    console.error(`${MASTER_CONFIG_NAME} validation of ${engineType} failed:`, errorMessage);
+    
+    throw new Error(`Config validation failed for [${engineType}]: ${errorMessage}`);
   }
 }
 

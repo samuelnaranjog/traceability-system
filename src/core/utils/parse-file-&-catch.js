@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 /**
      * @description Reads and extract the parsed json from a file.
      * @param {string} absolutePath - Absolute path the file to parse

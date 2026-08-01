@@ -16,8 +16,8 @@ import { visit } from 'unist-util-visit';
 import { toString } from 'mdast-util-to-string';
 
 // Built Methods
-import { findWorkTreePath } from '../git-tree-workflow/GitWorkflowOperations';
-import LinkType from '../utils/ResolveLinkType';
+import { findWorkTreePath } from '../git-tree-workflow/GitWorkflowOperations.js';
+import LinkType from '../utils/ResolveLinkType.js';
 
 
 class DuplicateArtifact extends Error {
