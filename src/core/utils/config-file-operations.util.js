@@ -17,7 +17,7 @@ export function createConfigFile(configName = MASTER_CONFIG_NAME) {
 
     try {
       writeFileSync(newFilePath, JSON.stringify(configDefaultData, null, 2));
-      console.log("File created successfully!");
+      //console.log("File created successfully!");
       return newFilePath;
     } catch (error) {
       console.error(`Failed to create the ${configName} file:`, error);
@@ -33,21 +33,19 @@ export function createConfigFile(configName = MASTER_CONFIG_NAME) {
 
 export function validateConfigPresence(configName = MASTER_CONFIG_NAME) {
   try{
-    console.log("==== Validating config presence ====="); //to debug uncoment
+    //console.log("==== Validating config presence ====="); //to debug uncoment
     const worktreeFolder = GW.findWorktreePath();
     const items = readdirSync(worktreeFolder, { withFileTypes: true });
     const files = items.filter((item) => item.isFile());
-    console.log(
-      `Current files in the system ${JSON.stringify(files)} --- Config file name to compare ${configName} `,
-    ); //to debug uncoment
+    //console.log(`Current files in the system ${JSON.stringify(files)} --- Config file name to compare ${configName} `,); //to debug uncoment
 
     let foundPath = undefined;
     let hasConfig = false;
     const configFile = files.find((file) => file.name === configName);
-    console.log(`Data extracted from config ${JSON.stringify(configFile)}`); //to debug uncoment
+    //console.log(`Data extracted from config ${JSON.stringify(configFile)}`); //to debug uncoment
 
     if (configFile) {
-      console.log(`successfully indentify the cofnig presence`)
+      //console.log(`successfully indentify the cofnig presence`)
       hasConfig = true;
       foundPath = path.join(worktreeFolder, configName);
     } else {

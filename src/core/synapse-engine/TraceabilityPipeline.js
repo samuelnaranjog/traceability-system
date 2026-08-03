@@ -134,12 +134,18 @@ export default class TraceabilityPipeline{
          * If it finds a match and its not a Analytical breakdown artifact, 
          * then the path of the artifact can be extracted to write in it the **connections**
          */
+        files.forEach(file => {
+            //console.log(`[TELEMETRY Artifact Files extracted] files to scan:`, file.name );
+        })
+        
+
             files.forEach(file => {
 
                 // Select Name and file title artifact with numbers
                 const artifactInTitle = file.name.match(titleArtifactIdentifierReg) ?.[0];
                 const fileNameInTitle = file.name.match(titleFileNameReg) ?.[0];
 
+                //console.log(`[TELEMETRY] find match artifact ${artifactInTitle} for file with name ${file.name}` );
 
                 /**
                  * Condition in context:
@@ -147,9 +153,14 @@ export default class TraceabilityPipeline{
                  * - Validates if there is contextual name in the title, if so it check if is analytical breakdown, is true well not valid artifact file skip current.
                  * - Checks what is the file of the Accepted Artifact stored identifier
                  */
+                
                 if (artifactInTitle) {
                     if (artifactInTitle && fileNameInTitle == "Analytical_Breakdown") return; // Skips the current file
+                    //console.log(`[TELEMETRY] Comparing ${artifact} == ${artifactInTitle} for ${file.name}` );
+
                     if (artifact == artifactInTitle && (fileNameInTitle !== "Analytical_Breakdown")) {
+                        //console.log(`[TELEMETRY] Comparing ${artifact} == ${artifactInTitle} for ${file.name}` );
+
                         //Build a valid system resistant path
                         const resolvedPath = path.join(file.path, file.name)
                         validArtifactPath.add(resolvedPath)
@@ -157,10 +168,14 @@ export default class TraceabilityPipeline{
                 }
 
             })
+            //console.log(`[TELEMETRY] Target: ${artifact} | Set Size: ${validArtifactPath.size} | Paths:`, [...validArtifactPath])
 
             //Check the docs don't have repeated artifacts
             if(validArtifactPath.size > 1){
                 throw new DuplicateArtifact(`The next is a location or locations where ${artifact} is duplicated: ${JSON.stringify([...validArtifactPath])}`);
+            }
+            if(validArtifactPath.size == 0){
+                throw new Error(`The artifact ${artifact} file doesn't exist, but there are some reference or references pointing to it, please clean them up`)
             }
 
             //Valid Path extracted
@@ -182,7 +197,7 @@ export default class TraceabilityPipeline{
      */
 
     static classifyArtifactConnections(connectedFilesInput, guidelines, fileArtifactIdentifierReg, fileExtensionExtractionReg, systemArtifacts){
-
+        // DEPRACATED!
         const currentClasification = {
             "📕 Architecture": [],
             "📓 Requirements": [],
@@ -270,6 +285,7 @@ export default class TraceabilityPipeline{
      */
 
     static buildMarkdownConnectionTable(activateHeader, categorizedData, artifactPath, fileAvoidExtensionReg) {
+        // DEPRACATED!
 
         /**
         * Documentation for markdown rendering logic:
@@ -351,8 +367,9 @@ export default class TraceabilityPipeline{
      * @returns {string} updatedFile - The file with its previous content and the updated data, helpful data logic testing
      */
     static writeConnectionsToArtifact(artifact, artifactPath, markdownData){
-        // Should place path -> validArtifactPath but i will hardcode it to ensure no data is lost
+        // DEPRACATED!
 
+        // Should place path -> validArtifactPath but i will hardcode it to ensure no data is lost
         console.log("DEBUG: Receiving artifact:", artifact);
 
         const artifactData = fs.readFileSync(artifactPath, 'utf8'); // Extract artifact data to define where to plug
@@ -484,7 +501,7 @@ export default class TraceabilityPipeline{
      */
     static buildFileLinks(artifactFilePath) {
         
-        console.log(`DEBUG: Running buildFileLinks!!!. `) //uncoment to debug 
+        //console.log(`DEBUG: Running buildFileLinks!!!. `) //uncoment to debug 
 
         
 
@@ -496,7 +513,7 @@ export default class TraceabilityPipeline{
 
             const fileASTData = this.parseAST(artifactFilePath);
 
-            console.log(`DEBUG: Parsed data for ${artifactFilePath} in buildFileLinks: ${JSON.stringify(fileASTData)} . `) //uncoment to debug 
+            //console.log(`DEBUG: Parsed data for ${artifactFilePath} in buildFileLinks: ${JSON.stringify(fileASTData)} . `) //uncoment to debug 
 
             const CONNECTION_REGEX = /^connections?$/i
 
@@ -508,7 +525,7 @@ export default class TraceabilityPipeline{
 
                     if (nextSibling?.type !== 'table') return
 
-                    console.log(`DEBUG: Found table in data while reading AST data from file. The data of the table is! ${JSON.stringify(nextSibling.children)} `) //uncoment to debug 
+                    //console.log(`DEBUG: Found table in data while reading AST data from file. The data of the table is! ${JSON.stringify(nextSibling.children)} `) //uncoment to debug 
 
                     const dataRows = nextSibling.children.slice(1);
 
@@ -517,21 +534,21 @@ export default class TraceabilityPipeline{
                         
                         const [categoryLabel, valueCell] = row.children;
 
-                        console.log(`DEBUG: Reading row columns ${JSON.stringify(categoryLabel)} & ${JSON.stringify(valueCell)} `) //uncoment to debug 
+                        //console.log(`DEBUG: Reading row columns ${JSON.stringify(categoryLabel)} & ${JSON.stringify(valueCell)} `) //uncoment to debug 
                         
                         const classification = toString(categoryLabel).trim()
                         
-                        console.log(`DEBUG: Extract classification text:! ${classification}`) //uncoment to debug 
+                        //console.log(`DEBUG: Extract classification text:! ${classification}`) //uncoment to debug 
                         visit(valueCell, 'link', (node) =>{
                             //console.log(`AST data in the node:! ${JSON.stringify(node)}`) //uncoment to debug 
-                            console.log(`DEBUG: Extract url:! ${node.url}`) //uncoment to debug 
+                            //console.log(`DEBUG: Extract url:! ${node.url}`) //uncoment to debug 
 
                             // ADR-009 Solve relative link duplication by building absolute path for realtive links
                             
                             const url = this.evaluateLinkRoute(artifactFilePath, node.url);
                             const customLinkName = node.children?.[0]?.value ?? "Unnamed Link"
 
-                            console.log(`DEBUG: 'buildFileLinks' set ${node.url} to: ${url}`) //uncoment to debug 
+                            //console.log(`DEBUG: 'buildFileLinks' set ${node.url} to: ${url}`) //uncoment to debug 
                             fileLinksMap.set(url, {"classification": classification, "linkName": customLinkName});
                                 
                         })
@@ -592,10 +609,10 @@ export default class TraceabilityPipeline{
         const hardLinkClassifiedMap = currentClassificationMap;
 
         const fileLinks = Array.from(fileLinksWithTypeMap.keys())
-        console.log(`DEBUG: In 'classifyAndConquerHard' about to define if this link are hand or not: ${JSON.stringify(fileLinks)}. `) //uncoment to debug
+        //console.log(`DEBUG: In 'classifyAndConquerHard' about to define if this link are hand or not: ${JSON.stringify(fileLinks)}. `) //uncoment to debug
         for(const link of fileLinks){
 
-            console.log(`DEBUG: In 'classifyAndConquerHard' Analizing link: ${link}. `) //uncoment to debug
+            //console.log(`DEBUG: In 'classifyAndConquerHard' Analizing link: ${link}. `) //uncoment to debug
             // The link data must be sets
             // inRp = in past reference artifact set
             // inRc = in current reference artifact set
@@ -608,7 +625,7 @@ export default class TraceabilityPipeline{
                 
             if (!inRc && !inRp){
 
-                console.log(`DEBUG: In 'classifyAndConquerHard' Link was classified as hard: ${!inRc && !inRp}. `) //uncoment to debug
+                //console.log(`DEBUG: In 'classifyAndConquerHard' Link was classified as hard: ${!inRc && !inRp}. `) //uncoment to debug
 
                 /** 
                  * @type {classificationAndLinkData}
@@ -646,15 +663,15 @@ export default class TraceabilityPipeline{
         //2. Use a map of types like {hardlinkMap}
 
         //console.log(`DEBUG: arguments passed to classifyAndConquerDynamic:`, currentClassificationMap, connectedFilesInput, guidelines, fileArtifactIdentifierReg, fileExtensionExtractionReg, systemArtifactsSet) //uncoment to debug
-        console.log('DEBUG: *ClassifyAndConquerDynamic* This data is used to assign each file to a classification:', {connectedFilesInput});  // uncoment to debug
+        //console.log('DEBUG: *ClassifyAndConquerDynamic* This data is used to assign each file to a classification:', {connectedFilesInput});  // uncoment to debug
 
         connectedFilesInput.forEach( /** @param {TraceableFile} file */
     (file) => {
 
-            console.log(`DEBUG: Figuring out the file name to identify: ${file.name}. `) //uncoment to debug
+            //console.log(`DEBUG: Figuring out the file name to identify: ${file.name}. `) //uncoment to debug
             const artifactIdentifier = file.name.match(fileArtifactIdentifierReg)?.[0]; 
 
-            console.log(`DEBUG: Find the link identifier: ${artifactIdentifier}. `) //uncoment to debug
+            //console.log(`DEBUG: Find the link identifier: ${artifactIdentifier}. `) //uncoment to debug
 
             // ?: checks if the value exist else return undefined .[0] extracts the value
             const extension = file.name.match(fileExtensionExtractionReg); 
@@ -702,7 +719,7 @@ export default class TraceabilityPipeline{
 
               const singleCategory = [...classification][0];
 
-             console.log('DEBUG: *ClassifyAndConquerDynamic* about to add:', { file: file.name, artifactIdentifier, extension, tag: singleCategory });  // uncoment to debug
+             //console.log('DEBUG: *ClassifyAndConquerDynamic* about to add:', { file: file.name, artifactIdentifier, extension, tag: singleCategory });  // uncoment to debug
 
               if(currentClassificationMap.get(singleCategory)){
                     currentClassificationMap.get(singleCategory).push({"link": file.path, "linkName": FALLBACK_LINK_NAME, "isHand": false  })
@@ -732,7 +749,7 @@ export default class TraceabilityPipeline{
 
         try {
               fileData = readFileSync(absolutePath, "utf8");
-              console.log(`DEBUG: current data in file to parse: ${fileData}`); //Uncoment to debug
+              //console.log(`DEBUG: current data in file to parse: ${fileData}`); //Uncoment to debug
             } catch (error) {
               console.error(`Fail to access the file ${absolutePath}`, error.message);
             }
@@ -740,9 +757,7 @@ export default class TraceabilityPipeline{
             let dataJSON;
             try {
               dataJSON = JSON.parse(fileData);
-              console.log(
-                `DEBUG: Successfully parse the file data: ${JSON.stringify(dataJSON)}`,
-              ); //Uncoment to debug
+              //console.log( `DEBUG: Successfully parse the file data: ${JSON.stringify(dataJSON)}`,); //Uncoment to debug
 
               return dataJSON;
             } catch (error) {
@@ -777,23 +792,22 @@ export default class TraceabilityPipeline{
             process.exit(1);
         }
         
-        console.log(
-              `DEBUG: Current files in the system ${JSON.stringify(files)}  `); //to debug uncoment
+        //console.log(`DEBUG: Current files in the system ${JSON.stringify(files)}  `); //to debug uncoment
 
         /**@type {Dirent} */
         const foundFile = files.find((file) => file.name == fileName);
             
         let fullfilePath = '';
         if(!foundFile){
-            console.log(`[Synapse |Set Up|] The file ${fileName} does not exist` )
+            //console.log(`[Synapse |Set Up|] The file ${fileName} does not exist` )
 
             try{
                 fullfilePath = path.join(worktreeFolder, fileName);
-                console.log(`[Synapse |Set Up|] Creating file ${fileName}` );
+                //console.log(`[Synapse |Set Up|] Creating file ${fileName}` );
                 writeFileSync(fullfilePath, "{}");
             }
             catch(error){
-                console.error(`[Synapse |Error|] The file ${fileName} couldn't be created`,  error )
+                console.error(`[Synapse] The file ${fileName} couldn't be created`,  error )
                 process.exit(1);
             }
             
@@ -813,7 +827,7 @@ export default class TraceabilityPipeline{
      */
 
     static buildASTMarkdownConnectionTable(categorizedData, artifactPath, fileAvoidExtensionReg) {
-        console.log('IS RUNNING???')
+        
         try {
 
             const artifactDir = path.dirname(artifactPath);
@@ -847,7 +861,7 @@ export default class TraceabilityPipeline{
 
 
             // where the iretation starts Object.entries(categorizedData)
-            console.log(`DEBUG: The iterable array: ${JSON.stringify(Array.from(categorizedData.entries()))}, Once sort ; ${JSON.stringify(mapEntries)}. `) //uncoment to debug
+            //console.log(`DEBUG: The iterable array: ${JSON.stringify(Array.from(categorizedData.entries()))}, Once sort ; ${JSON.stringify(mapEntries)}. `) //uncoment to debug
 
             // Table To insert
             for (const [key, arrayOfUrls] of categorizedData) {
@@ -893,7 +907,7 @@ export default class TraceabilityPipeline{
                 arrayOfUrls.forEach(url => {
                     
 
-                    console.log(`DEBUG: within for each of buildASTMarkdownConnectionTable, iterating over : ${JSON.stringify(url)}. `) //uncoment to debug
+                    //console.log(`DEBUG: within for each of buildASTMarkdownConnectionTable, iterating over : ${JSON.stringify(url)}. `) //uncoment to debug
                     let newLink;
 
                     // Determine if hand or dynamic 
@@ -972,7 +986,7 @@ export default class TraceabilityPipeline{
       .use(remarkStringify) 
       .stringify(astNode)
   )};
-        console.log(`DEBUG: Receiving in writeASTConnectionsToArtifact :`, {Path: artifactPath, TableToInsert: serializeAST(astTable), sectionRule: connectionRegRule   });
+        //console.log(`DEBUG: Receiving in writeASTConnectionsToArtifact :`, {Path: artifactPath, TableToInsert: serializeAST(astTable), sectionRule: connectionRegRule   });
 
         const CONNECTION_REGEX = connectionRegRule;
 
@@ -1005,7 +1019,7 @@ export default class TraceabilityPipeline{
 
 
         if (!headerFound) {
-            console.log(`[Synapse |Constraint|] Skipped connections update for file: ${artifactPath} - No connections header found.`);
+            console.log(`⚠️ [Synapse] Skipped connections update for file: ${artifactPath} - No connections header found.`);
         }
         else {
             // Update the file data
@@ -1038,7 +1052,7 @@ export default class TraceabilityPipeline{
              const curratedData = JSON.stringify(data);
 
               writeFileSync(filePath, curratedData);
-              console.log("[synapse] Successfully update the connections .synapse-state.json snapshot");
+              //console.log("[synapse] Successfully update the connections .synapse-state.json snapshot");
               
             } catch (error) {
               console.error("[synapse] Fail to update the connections .synapse-state.json snapshot:", error);

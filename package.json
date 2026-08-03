@@ -12,7 +12,7 @@
 
       "collapse": "./src/scripts/git-tree-workflow/CollapseEngine.js",
 
-      "synapse": "./src/core/synapse-engine/AutoLinkRefactorExecutionThread.js"
+      "synapse": "./src/core/synapse-engine/synapse-engine.js"
 
    },
 

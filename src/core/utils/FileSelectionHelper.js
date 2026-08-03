@@ -1,11 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
-// ALGORITHM PURPOSE:
-// - Finds files & directories. Stores the files data in an object of arrays
-
 /**
- * 
+ * @description Finds files & directories recursively. Stores the files data in an object of arrays
  * @param {string} folderPath - Must be the path of the folder over which the files must be scan and mapped be perform
  * @param {string[]} excludeList - Files that shouldn't be stored
  * @param {import("../synapse-engine/TraceabilityPipeline.js").DirectoryAndFileMap} dirsAndFilesObj 
@@ -44,15 +41,15 @@ export default function SearchAndDivide(folderPath, excludeList, dirsAndFilesObj
       (dir) => path.join(dir.path, dir.name) === folderPath, //Checks if the item is actually the scanned directory and figure out its index!
     ); // Breaks once true returning the index of that elements otherwise -1
 
-    console.log("Index of found element: ", currentFolderLocation);
+    //console.log("Index of found element: ", currentFolderLocation);
 
     if (currentFolderLocation != -1) {
-      console.log("Item to pop ", dirsAndFilesObj.dirs[currentFolderLocation]);
+      //console.log("Item to pop ", dirsAndFilesObj.dirs[currentFolderLocation]);
       dirsAndFilesObj.dirs.splice(currentFolderLocation, 1); // Splice deletes the element at a given index and a number of elements from that index 
     }
-    console.log("Dirs state after pop ", dirsAndFilesObj.dirs);
+    //console.log("Dirs state after pop ", dirsAndFilesObj.dirs);
 
-    console.log("Lenght of dir: ", dirsAndFilesObj.dirs.length);
+    //console.log("Lenght of dir: ", dirsAndFilesObj.dirs.length);
 
     // Recursive call when directories to explore and extract but also works as stop condition
     if (dirsAndFilesObj.dirs.length > 0) {
@@ -67,7 +64,7 @@ export default function SearchAndDivide(folderPath, excludeList, dirsAndFilesObj
       return dirsAndFilesObj;
     }
   } catch (error) {
-    console.log("Program did not found and divide, this is the error:", error);
+    console.error("Program did not found and divide, this is the error:", error);
     return error;
   }
 }

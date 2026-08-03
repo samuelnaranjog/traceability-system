@@ -56,12 +56,12 @@ export default class GitWorkflowOperations {
 
       const currentPath = currentDirectory.stdout.trim();
 
-      console.log("Current dir found at findWorkTreePath: ", currentPath); // uncoment to debug
+      //console.log("Current dir found at findWorkTreePath: ", currentPath); // uncoment to debug
 
       return currentPath;
     } catch (error) {
       console.error(
-        "❌ The current cli open dir or custom path is not part of a valid worktree.",
+        "The current cli open dir or custom path is not part of a valid worktree.",
         error.message,
       );
       // console.error(error.message); // Uncomment to debug the exact Git failure

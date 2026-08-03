@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import os from "os"
-import runTraceabilityPipeline from "../../src/core/synapse-engine/AutoLinkRefactorExecutionThread.js";
+import runTraceabilityPipeline from "../../src/core/synapse-engine/synapse-engine.js";
 import GitWorkflowOperations from "../../src/core/git-tree-workflow/GitWorkflowOperations.js";
 import { jest } from '@jest/globals';
 import { MOCK_FILES } from "../utils/project-files-data.mock.js";

@@ -10,12 +10,13 @@ export const DEFAULT = {
         "package-lock.json",
         "package.json"
         ],
-        acceptedSystemArtifacts: ["REQ", "ADR", "VS"],
+        acceptedSystemArtifacts: ["REQ","SREQ", "SSREQ", "ADR", "VS"],
         connectionInsertionTitleRegex: "connections",
         classificationGuidelines: {
             artifactCategoryMap: {
             '📕 Architecture': ["VS", "ADR"],
             '📓 Requirements': ["REQ"],
+            "📑 Derived Requirements": ["SREQ", "SSREQ"]
             },
             extensionCategoryMap: { 
                 '⚙️ Core Logic (Backend/Systems)': ["js"], 

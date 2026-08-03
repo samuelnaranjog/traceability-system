@@ -25,7 +25,9 @@ export default function buildSynapseWorkingData(validatedConfig){
 
         // THIS ARE THE PREDEFINED SYSTEM CONSTRAINTS AND VALUES FOR THE SYNAPSE ENGINE
         treaceabilityKeyWords: {start: "@trace", end: "@"},
-        fileTitleIdentifierFilteringRegex: /\b[A-Z]+-\d+/, //Regex for selecting Artifact format from text e.g: From TSO-ADR-000 the regex will select ADR-000
+        textIdentifierFilteringRegexG: /(?<=^|\s)[A-Z]+-\d+[A-Z]?/g, // Global: from "REQ-001A someText" extracts "REQ-001A"
+        fileTitleIdentifierFilteringRegex: /(?<=-)[A-Z]+-\d+[A-Z]?/, //Regex for selecting Artifact format from text e.g: From TSO-ADR-000_Some_title the regex will select ADR-000, from TSO-SREQ-000A -> "SREQ-000A".
+        artifactIdPrefix: /\b[A-Z]+/g, //Global: Regex selects only artifact Identifier no num e.g: from REQ-001 -> "REQ", from SREQ-000 -> "SREQ"
         fileNameFilterRegex: /(?<=_)[a-zA-Z_]+/, //Regex for selecting the name based on the underscore "_" convention given to the file
         fileIdentifierNoNumFilteringRegex: /(?<=-)[A-Z]+(?=-)/, // Select only the artifact for TSO-REQ-001 it will extract "REQ"
         fileIdentifierNoNumNorProjectRegex: /\b[A-Z]+(?=-\d+)/, // Select only the artifact from "REQ-001" it will extract "REQ"

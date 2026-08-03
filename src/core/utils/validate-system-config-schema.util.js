@@ -88,16 +88,16 @@ export function systemSchemaValidation(engineType, systemConfigObj, configName =
 
   try{
     if(engineType == "synapse-engine"){
-      console.log('Try to validate using schema  ✔️')// to debug uncoment
+      //console.log('Try to validate using schema  ✔️')// to debug uncoment
       const validatedSynapseConfig = configSchemaSynapse.validateSync(systemConfigObj[engineType], {
         abortEarly: false,
         stripUnknown: true
       })
 
-      if(!validatedSynapseConfig) throw new Error("Couldn't get a valid value form the validation schema")
+      if(!validatedSynapseConfig) throw new Error("[Synapse] Couldn't get a valid value from the validation schema")
 
-        console.log('DEBUG: Data to return within systemSchemaValidation is :', validatedSynapseConfig)
-        return validatedSynapseConfig;
+      //console.log('DEBUG: Data to return within systemSchemaValidation is :', validatedSynapseConfig)
+      return validatedSynapseConfig;
     }
 
     if(engineType == "dev-workflow"){
@@ -105,7 +105,7 @@ export function systemSchemaValidation(engineType, systemConfigObj, configName =
         abortEarly: false,
         stripUnknown: true})
 
-        if(!validatedSpawnConfig) throw new Error("Couldn't get a valid value form the validation schema")
+        if(!validatedSpawnConfig) throw new Error("[Spawn] Couldn't get a valid value form the validation schema")
 
         return validatedSpawnConfig;
     }
@@ -118,7 +118,7 @@ export function systemSchemaValidation(engineType, systemConfigObj, configName =
 
     console.error(`${MASTER_CONFIG_NAME} validation of ${engineType} failed:`, errorMessage);
     
-    throw new Error(`Config validation failed for [${engineType}]: ${errorMessage}`);
+    throw new Error(`Config validation failed for [${engineType}], please ensure the config file has no JSON errors and the data is valid: ${errorMessage}`);
   }
 }
 

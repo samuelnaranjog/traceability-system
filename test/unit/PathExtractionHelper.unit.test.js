@@ -10,6 +10,10 @@ import { MOCK_FILES } from "../utils/project-files-data.mock.js";
 
 describe('Function builds the relationships between artifact and files without errors', ()=>{
 let mockRootDir;
+
+// REGEX extractors
+const textIdentifierFilteringRegexG = /(?<=^|\s)[A-Z]+-\d+[A-Z]?/g;// Global: from "REQ-001A someText" extracts "REQ-001A"
+const artifactIdPrefix =  /\b[A-Z]+/g; //Global: Regex selects only artifact Identifier no num e.g: from REQ-001 -> "REQ", from SREQ-000 -> "SREQ"
    beforeEach(async () => {
        // 1. Create the isolated sandbox
        mockRootDir = await fs.mkdtemp(path.join(os.tmpdir(), "mock-project-"));
@@ -101,7 +105,7 @@ let mockRootDir;
         SearchAndDivide(mockRootDir, [".gitignore"], objOfDirsAndFiles);
         console.log(objOfDirsAndFiles);
 
-        const artifactConnectedToFiles = ExtractDataAndMatch(objOfDirsAndFiles, '@trace', '@', ["REQ", "ADR", "VS"]);
+        const artifactConnectedToFiles = ExtractDataAndMatch(objOfDirsAndFiles, '@trace', '@', ["REQ", "ADR", "VS"], textIdentifierFilteringRegexG, artifactIdPrefix);
         console.log('Some data:', JSON.stringify(artifactConnectedToFiles))
 
      })
