@@ -1,4 +1,4 @@
-// @trace REQ-020 ADR-009 @ 
+// @trace ADR-009 @ 
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -15,7 +15,7 @@ import findFileDataSync from './secureFileDataExtractor.js';
  * @returns {import('../synapse-engine/TraceabilityPipeline').ArtifactRelatedFileConnection} storageStructure - The empty object where the artifacts will map the files that mention them
  */
 
-//put this in a helper ->>
+// @trace SREQ-020A ADR-009 @
 export default function ExtractDataAndMatch(itemsObj, regexStart, regexEnd, acceptedIdentifiers, candidateRegex, artifactIdentifierRegex) {
   //console.log(`[Extraction kernel] Accepted artifacts:`, acceptedIdentifiers)
   

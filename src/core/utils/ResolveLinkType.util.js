@@ -1,4 +1,4 @@
-// @trace ADR-009 REQ-020 @
+// @trace ADR-009 SREQ-020C @
 
 class LinkType {
     // Gate 1: Internal Document Anchors (Starts with #)

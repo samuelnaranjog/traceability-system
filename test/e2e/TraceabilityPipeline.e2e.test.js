@@ -1,4 +1,4 @@
-//@trace REQ-020 @ 
+//@trace SREQ-020D @ 
 import fs from "node:fs/promises";
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -101,7 +101,7 @@ let mockRootDir;
 });
 
 
-describe.only("[Synapse engine] handles hard written links", () => {
+describe("[Synapse engine] handles hard written links", () => {
 
 let mockRootDir;
    beforeEach(async () => {

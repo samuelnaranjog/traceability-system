@@ -1,6 +1,6 @@
-// @trace REQ-020 @
+/**@trace SREQ-020D @ */
 import * as yup from 'yup';
-import { MASTER_CONFIG_NAME } from './system-config.default.js';
+import { MASTER_CONFIG_NAME } from './system-config.default.util.js';
 
 const artifactCategoriesSchema = yup.lazy((value) => {
   // Ensure the input is a valid non-null object

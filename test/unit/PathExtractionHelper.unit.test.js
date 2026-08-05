@@ -3,11 +3,12 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import os from "os"
 import { jest } from '@jest/globals';
-import ExtractDataAndMatch from "../../src/core/utils/path-extraction-helper.js";
-import SearchAndDivide from "../../src/core/utils/FileSelectionHelper.js";
+import ExtractDataAndMatch from "../../src/core/utils/path-extraction-helper.util.js";
+import SearchAndDivide from "../../src/core/utils/FileSelectionHelper.util.js";
 import GitWorkflowOperations from "../../src/core/git-tree-workflow/GitWorkflowOperations.js";
 import { MOCK_FILES } from "../utils/project-files-data.mock.js";
 
+/**@trace SREQ-020A @ */
 describe('Function builds the relationships between artifact and files without errors', ()=>{
 let mockRootDir;
 

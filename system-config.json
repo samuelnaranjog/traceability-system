@@ -11,6 +11,8 @@
     ],
     "acceptedSystemArtifacts": [
       "REQ",
+      "SREQ",
+      "SSREQ",
       "ADR",
       "VS"
     ],
@@ -22,7 +24,7 @@
           "ADR"
         ],
         "📓 Requirements": [
-          "REQ"
+          "REQ", "SREQ", "SSREQ"
         ]
       },
       "extensionCategoryMap": {
@@ -34,7 +36,8 @@
         ],
         "🛡️ Verification (Tests & Config)": [
           "test.js"
-        ]
+        ],
+        "🛠️ Utility": ["util.js", "mock.js"] 
       }
     }
   },

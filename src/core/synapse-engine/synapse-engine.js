@@ -1,17 +1,16 @@
 #!/usr/bin/env node
 
-// @trace REQ-020 ADR-010 @
 // This is the function that executes the system task
 import url from 'url';
 import path from 'path';
 import { config } from "node:process";
-import SearchAndDivide from "../utils/FileSelectionHelper.js";
-import ExtractDataAndMatch from "../utils/path-extraction-helper.js";
+import SearchAndDivide from "../utils/FileSelectionHelper.util.js";
+import ExtractDataAndMatch from "../utils/path-extraction-helper.util.js";
 import ts from "./TraceabilityPipeline.js"
 import { match } from "node:assert";
 import { createConfigFile } from "../utils/config-file-operations.util.js";
 import { validateConfigPresence } from "../utils/config-file-operations.util.js";
-import { parseFileAndCatch } from "../utils/parse-file-&-catch.js";
+import { parseFileAndCatch } from "../utils/parse-file-&-catch.util.js";
 import buildSynapseWorkingData from "../utils/build-synapse-working-data.util.js";
 import { systemSchemaValidation } from "../utils/validate-system-config-schema.util.js";
 import { findWorkTreePath } from "../git-tree-workflow/GitWorkflowOperations.js";
@@ -22,7 +21,9 @@ const ENGINE_NAME = "[Synapse]"
 let startTime;
 let endTime;
 
+
 /** @param {string} vaultPath - Must be the path of the folder over which the files must be scan and mapped be perform */
+/**@trace SREQ-020D */ 
 export default function runTraceabilityPipeline(vaultPath /* Default argument */){
 
     try{
@@ -173,7 +174,7 @@ if (isDirectCliInvocation) {
     else if(duration >= 1000 && duration < 60000)  formattedDuration = `${(duration / 1000).toFixed(2)}s`;
     else formattedDuration = `${(duration / 60000).toFixed(2)}m`;
     
-    console.log(`🌐${ENGINE_NAME} Successfully Successfully built connections in ${formattedDuration} .`);
+    console.log(`🌐${ENGINE_NAME} Successfully built connections in ${formattedDuration} .`);
   } catch (error) {
     console.error(`${ENGINE_NAME} Engine execution failed:`, error.message);
     process.exit(1);

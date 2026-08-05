@@ -1,3 +1,4 @@
+/**@trace SREQ-020D @ */ 
 export const MASTER_CONFIG_NAME = "system-config.json"
 export const DEFAULT = {
     "synapse-engine": {
@@ -15,8 +16,7 @@ export const DEFAULT = {
         classificationGuidelines: {
             artifactCategoryMap: {
             '📕 Architecture': ["VS", "ADR"],
-            '📓 Requirements': ["REQ"],
-            "📑 Derived Requirements": ["SREQ", "SSREQ"]
+            '📓 Requirements': ["REQ", "SREQ", "SSREQ"],
             },
             extensionCategoryMap: { 
                 '⚙️ Core Logic (Backend/Systems)': ["js"], 

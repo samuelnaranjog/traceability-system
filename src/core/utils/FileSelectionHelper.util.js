@@ -8,6 +8,7 @@ import path from "node:path";
  * @param {import("../synapse-engine/TraceabilityPipeline.js").DirectoryAndFileMap} dirsAndFilesObj 
  */
 
+// @trace SREQ-020A @
 export default function SearchAndDivide(folderPath, excludeList, dirsAndFilesObj ) {
 
 

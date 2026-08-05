@@ -17,7 +17,7 @@ import { toString } from 'mdast-util-to-string';
 
 // Built Methods
 import { findWorkTreePath } from '../git-tree-workflow/GitWorkflowOperations.js';
-import LinkType from '../utils/ResolveLinkType.js';
+import LinkType from '../utils/ResolveLinkType.util.js';
 
 
 class DuplicateArtifact extends Error {
@@ -109,6 +109,7 @@ const FALLBACK_LINK_NAME = 'Unnamed Link';
     */
     /** @typedef {Map<link, classificationAndLinkData>} fileLinksMap */
 
+
 export default class TraceabilityPipeline{
 
     
@@ -121,6 +122,7 @@ export default class TraceabilityPipeline{
      * @param {regexExtractor} titleFileNameReg - The expression to select name given to the file
      * @returns {string} Valid path not repeated artifact 
      */
+    //@trace SREQ-020B @
     static findArtifactFile(artifact, files, titleArtifactIdentifierReg, titleFileNameReg) {
 
 
@@ -153,12 +155,14 @@ export default class TraceabilityPipeline{
                  * - Validates if there is contextual name in the title, if so it check if is analytical breakdown, is true well not valid artifact file skip current.
                  * - Checks what is the file of the Accepted Artifact stored identifier
                  */
-                
+                const analyticalBreakdownReg = /Analytical_Breakdown(?:_?\d+)?(?:\.md)?$/i;
+                //console.log(`Telemetrics: comparison for ${fileNameInTitle} evalutes to : ${analyticalBreakdownReg.test(fileNameInTitle)}`);
+
                 if (artifactInTitle) {
-                    if (artifactInTitle && fileNameInTitle == "Analytical_Breakdown") return; // Skips the current file
+                    if (artifactInTitle && analyticalBreakdownReg.test(fileNameInTitle)) return; // Skips the current file
                     //console.log(`[TELEMETRY] Comparing ${artifact} == ${artifactInTitle} for ${file.name}` );
 
-                    if (artifact == artifactInTitle && (fileNameInTitle !== "Analytical_Breakdown")) {
+                    if (artifact == artifactInTitle && (!analyticalBreakdownReg.test(fileNameInTitle))) {
                         //console.log(`[TELEMETRY] Comparing ${artifact} == ${artifactInTitle} for ${file.name}` );
 
                         //Build a valid system resistant path
@@ -468,6 +472,7 @@ export default class TraceabilityPipeline{
      * @param {string} link 
      * @returns {string} If it was file link returns absolute path. If it was hand type returns unmodified link
      */
+    // @trace ADR-009 @
     static evaluateLinkRoute(artifactFilePath, link){
         
         try{
@@ -499,6 +504,7 @@ export default class TraceabilityPipeline{
      * @param {string} artifactFilePath - Absolute path to the artifact to scan
      * @returns {fileLinksMap} A data structure that map links and its type
      */
+    //@trace SREQ-020C ADR-009 @
     static buildFileLinks(artifactFilePath) {
         
         //console.log(`DEBUG: Running buildFileLinks!!!. `) //uncoment to debug 
@@ -578,6 +584,7 @@ export default class TraceabilityPipeline{
      * @param {ArtifactRelatedFileConnection} data  - The Artifact related links object
      * @returns {Set} Returns a set of the artifact links in the data state passed
      */
+    //@trace SREQ-020C @
     static buildRefsLinks(artifactName, data){
         /**@type {TraceableFile[]} */
         
@@ -603,6 +610,7 @@ export default class TraceabilityPipeline{
      * @param {Set} currentRefsLinks 
      * @returns {mapOfClassifiedLinks}
      */
+    //@trace SREQ-020C @
     static classifyAndConquerHard(currentClassificationMap, fileLinksWithTypeMap, pastRefsLinks, currentRefsLinks){
         
         /** @type {mapOfClassifiedLinks}*/
@@ -658,6 +666,7 @@ export default class TraceabilityPipeline{
      * @param {Set<string>} systemArtifactsSet - Valid system artifacts list
      * @returns {mapOfClassifiedLinks} - Map with mutated classification
      */
+    //@trace SREQ-020B @
     static classifyAndConquerDynamic(currentClassificationMap, connectedFilesInput, guidelines, fileArtifactIdentifierReg, fileExtensionExtractionReg, systemArtifactsSet) {
         //1. Abstract the logic of classification to be define outside in the main thread
         //2. Use a map of types like {hardlinkMap}
@@ -825,7 +834,7 @@ export default class TraceabilityPipeline{
      * @param {regexExtractor} fileAvoidExtensionReg - Selects only the name avoiding any data  after the "."  e.g: ("myFile.js" will avoid ".js")
      * @returns {Object} The AST Object table ready to embeded that creates a markdown table when stringify and render by a markdown engine
      */
-
+    //@trace SREQ-020B @
     static buildASTMarkdownConnectionTable(categorizedData, artifactPath, fileAvoidExtensionReg) {
         
         try {
@@ -977,6 +986,8 @@ export default class TraceabilityPipeline{
      * @param {*} connectionRegRule - The title that should be present to render the connection table below it 
      * @returns {string} updatedFile - The file with its previous content and the updated data, helpful data logic testing
      */
+
+    //@trace SREQ-020B @
     static writeASTConnectionsToArtifact(artifactPath, astTable, connectionRegRule) {
         const serializeAST = (astNode) => {
         return String(
@@ -1027,7 +1038,13 @@ export default class TraceabilityPipeline{
 
             // Rewrite the file with the new content
             try {
-                fs.writeFileSync(artifactPath, updatedFile, 'utf-8');
+                // Support and avoid breaking callouts from specific markdown editors.
+                // Deletes AST injected '\' protection char for broken links injection
+                const finalMarkdown = updatedFile
+                    .replace(/\\\[!(.*?)\]/g, '[!$1]')
+                    .replace(/\\\[\\\[/g, '[[');;
+
+                fs.writeFileSync(artifactPath, finalMarkdown, 'utf-8');
                 return updatedFile;
             }
             catch (error) {
@@ -1046,6 +1063,7 @@ export default class TraceabilityPipeline{
      * @param {string} filePath - The absolute path of the .synapse-state.json
      * 
      */
+    
     static writeJsonDataToFile(data, filePath){
         try {
             // Stringify 

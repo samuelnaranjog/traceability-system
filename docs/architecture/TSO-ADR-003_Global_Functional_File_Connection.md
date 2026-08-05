@@ -9,7 +9,7 @@ Description:
 > 
 > ---
 > *Connections*
-> - **Related REQs:** | [TSO-REQ-018_Links_to_code_and_prototypes_from_REQs](../requirements/TSO-REQ-018_Links_to_code_and_prototypes_from_REQs.md) | [TSO-REQ-020_Automatic_Link_Refactor_Script](../requirements/TSO-REQ-020_Automatic_Link_Refactor_Script.md) |
+> - **Related REQs:** | [TSO-REQ-018_Links_to_code_and_prototypes_from_REQs](../requirements/TSO-REQ-018_Links_to_code_and_prototypes_from_REQs.md) | [TSO-REQ-020_Automatic_Connections_Engine](../requirements/TSO-REQ-020_Automatic_Connections_Engine.md) |
 > - **Related ADRs:** | [TSO-ADR-004_Links_Accesibilty_To_The_Public](TSO-ADR-004_Links_Accesibilty_To_The_Public.md) |
 > 
 > ---
@@ -115,7 +115,7 @@ Description:
 > - Code implementation must include a comment in the file with the REQ ID or ADR it implements. Making possible the Dev workflow
 > - The  [TSO-REQ-018_Links_to_code_and_prototypes_from_REQs](../requirements/TSO-REQ-018_Links_to_code_and_prototypes_from_REQs.md) must explain the structure to link to specific paths for web prototypes and repo navigability inside a REQ
 > - Obsidian auto-refactoring engine does not supports folder modification so ensure to be aware of that limitation
-> - The Automatic Script should be implemented to ensure manual refactoring resistance in [TSO-REQ-020_Automatic_Link_Refactor_Script](../requirements/TSO-REQ-020_Automatic_Link_Refactor_Script.md)
+> - The Automatic Script should be implemented to ensure manual refactoring resistance in [TSO-REQ-020_Automatic_Connections_Engine](../requirements/TSO-REQ-020_Automatic_Connections_Engine.md)
 
 ---  
 ###### Reference :
