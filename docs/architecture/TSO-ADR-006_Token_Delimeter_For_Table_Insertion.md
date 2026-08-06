@@ -1,6 +1,6 @@
 ---
-State: Pending
+State: Deprecated
 Project: TraceabilitySystem
-Priority:
+Priority: P2-Normal
 Description:
 ---

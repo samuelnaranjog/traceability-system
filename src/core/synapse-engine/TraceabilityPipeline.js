@@ -1,4 +1,4 @@
-// @trace REQ-020 ADR-006 @
+// @trace REQ-020 @
 
 import path from 'node:path';
 import fs, { Dirent, readFileSync } from "node:fs";

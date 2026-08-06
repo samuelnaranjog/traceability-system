@@ -7,11 +7,11 @@ Description: Scanning the project, extracting file paths and building an Interco
 
 # Connections
 
-| Type                                  | Route                                                                                                                                                                                                                                                                |
-| :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **📓 Requirements**                   | [TSO-SREQ-020B\_Classify\_&\_ Create\_Dynamic\_Connections\_Table](<TSO-SREQ-020B_Classify_&_ Create_Dynamic_Connections_Table.md>)                                                                                                                                  |
-| **🛡️ Verification (Tests & Config)** | [PathExtractionHelper.unit.test](../../test/unit/PathExtractionHelper.unit.test.js)                                                                                                                                                                                  |
-| **🛠️ Utility**                       | [FileSelectionHelper.util](../../src/core/utils/FileSelectionHelper.util.js)<br />[build-synapse-working-data.util](../../src/core/utils/build-synapse-working-data.util.js)<br />[path-extraction-helper.util](../../src/core/utils/path-extraction-helper.util.js) |
+| Type                                  | Route                                                                                                                                                                |
+| :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **📓 Requirements**                   | [TSO-SREQ-020B\_Classify\_&\_ Create\_Dynamic\_Connections\_Table](<TSO-SREQ-020B_Classify_&_ Create_Dynamic_Connections_Table.md>)                                  |
+| **🛡️ Verification (Tests & Config)** | [PathExtractionHelper.unit.test](../../test/unit/PathExtractionHelper.unit.test.js)                                                                                  |
+| **🛠️ Utility**                       | [FileSelectionHelper.util](../../src/core/utils/FileSelectionHelper.util.js)<br />[path-extraction-helper.util](../../src/core/utils/path-extraction-helper.util.js) |
 
 # Acceptance Criteria
 
@@ -20,7 +20,7 @@ Description: Scanning the project, extracting file paths and building an Interco
 > [!success] **Scenario:** Folder File Mapping
 > `Precondition - Action - Outcome`
 >
-> **Given** the commit as been trigger , **When** the script begins , **Then**
+> **Given** the `synapse-engine` has been trigger , **When** the script begins , **Then**
 >
 > 1. The engine correctly identifies the current `cwd` project root folder and operates over it.
 > 2. Files and directories data including its name and path are store separated
@@ -46,8 +46,12 @@ Description: Scanning the project, extracting file paths and building an Interco
 
 ***
 
-###### Links:
+## References
 
-@trace REQ-020 ADR-009@
+* **Implements:** @trace ADR-009  @
+* **Depends On:** @trace @
+* **Parent:** @trace REQ-020 @
 
-###### Reference :
+***
+
+## PKB References

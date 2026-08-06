@@ -12,10 +12,10 @@ Description:
 >
 > # *Connections*
 >
-> | Type                | Route                                                                                                      |
-> | :------------------ | :--------------------------------------------------------------------------------------------------------- |
-> | **📕 Architecture** | [TSO-ADR-004\_Links\_Accesibilty\_To\_The\_Public](TSO-ADR-004_Links_Accesibilty_To_The_Public.md)         |
-> | **📓 Requirements** | [TSO-REQ-020\_Automatic\_Connections\_Engine](../requirements/TSO-REQ-020_Automatic_Connections_Engine.md) |
+> | Type                | Route                                                                                                                                                                                                                                 |
+> | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+> | **📕 Architecture** | [TSO-ADR-004\_Links\_Accesibilty\_To\_The\_Public](TSO-ADR-004_Links_Accesibilty_To_The_Public.md)<br />[TSO-ADR-011\_Unidirectional\_Artifact\_Traceability\_Protocol](TSO-ADR-011_Unidirectional_Artifact_Traceability_Protocol.md) |
+> | **📓 Requirements** | [TSO-REQ-020\_Automatic\_Connections\_Engine](../requirements/TSO-REQ-020_Automatic_Connections_Engine.md)                                                                                                                            |
 >
 > ***
 >
@@ -29,9 +29,7 @@ Description:
 >
 > Another challenge that the system must address is what happens if you change the code editor (the ideal is software resistant links non dependent to enterprise software). How is the to code link going to open the editor to maintain the functional link or is there a more resistant alternative??.
 >
-> Assets rendering such as images or videos must also be address properly so that it is not dependent on Obsidian routing.
->
-> Lastly what happens if you modify the name of a file, how can you enable a feature of automatic renaming Obsidian like but with the new relative markdown functionality.
+> Assets rendering such as images or videos must also be address properly so that it is not dependent on md editor routing.
 >
 > ***Propose Design***
 >
@@ -57,7 +55,7 @@ Description:
 >
 > Use the relative path pattern for markdown image rendering
 >
-> ##### Scenario D:  Resistant from Obsidian to IDE and Github linkage (Dual-Layer Traceability Architecture)
+> ##### Scenario D:  Resistant from md editor to IDE and Github linkage (Dual-Layer Traceability Architecture)
 >
 > To ensure low friction while developing the project but ensure Docs are fully connected for anyone auditing it.
 > Placing proprietary URIs within the docs make the system proprietary dependent introducing a failure point. Since the system ensures each code implementation is related to a REQ or an ADR leverage the inmutable ID, use:
@@ -69,7 +67,7 @@ Description:
 >
 > Obsidian and VS Code (Probably other IDEs) both integrate an automatic link refactoring engine but it must be explicitly enabled. However for the IDE the refactoring engine is limited to the folder in which the file is store making it not possible to Automatically refactor code files or ADRs from REQS or REQ from ADRs.
 >
-> The only option to solve this is to leverage the git integration to trigger a **custom script** to automatically update any modified code file.
+> The only option to solve this is to leverage the git integration to trigger a **custom engine** to automatically update any modified code file.
 >
 > ## **2. The Decision**
 >
@@ -78,7 +76,7 @@ Description:
 > * **Instead of:** `[[SYS-REQ-001_Auth_Protocol]]`
 >
 > * **Write this:** `[SYS-REQ-001 Auth Protocol](../SYS-REQ-001_Auth_Protocol.md)`
->   With this format Obsidian will understand the markdown link but also Git Hub or the code editor
+>   With this format md editor will understand the markdown link but also Git Hub or the code editor
 >
 > > For images embedding:
 >
@@ -127,28 +125,36 @@ Description:
 >
 > > Automatic Connection Engine:
 > > **Leveraging the automatic link engine**
-> > Since the system now integrate the Automatic Connection Engine you can go to the `Artifact` and navigate through the relative links to find specific implementations or understand the overall logic that implement the Artifact
+> > The engine creates connection based on the next 2 keywords and an artifact mention between them `@trace` `<Artifact identifier + number>` `@` .
+>
+> Since the system now integrates the Automatic Connection Engine you can go to the `Artifact` and navigate through the relative links to find specific implementations or understand the overall logic that implement the Artifact
 >
 > > The Custom Pre-commit integration for automatic connection:
 >
-> Implement a custom script trigger by git commit to update the code links automatically to ensure this system doesn't becomes a collection of broken links and a manual refactoring nightmare. This is trigger to ensure to push changes are perfectly connected.
+> Implement a custom script that trigger the `synapse-engine`  by git commit to update the code links automatically to ensure this system doesn't becomes a collection of broken links and a manual refactoring nightmare. This is trigger to ensure to push changes are perfectly connected.
 >
 > ## **3. The Consequences (Architectural Impact)**
 >
 > ***Positive Effects***
 >
 > * Ensures Repository and IDE navigability. Anyone inspecting the repo will be able to navigate without friction using the relative markdown links
-> * Introduces a workflow for Builder productivity through *global search*
+> * Introduces a workflow for Builder productivity through *global search* or IDE navigability.
 >
 > ***Constraints***
 >
 > * Assets must be strictly store within the `assets` folder to ensure proper embedding
-> * Code implementation must include a comment in the file with the REQ ID or ADR it implements. Making possible the Dev workflow
+> * Code implementation must include a comment in the file with the REQ ID or ADR it implements. Making possible the automatic connection or global search.
 > * An ADR must explain the structure to link to specific paths for web prototypes and repo navigability inside an Artifact
 > * The Automatic Engine should be implemented to ensure manual refactoring resistance in REQ-020
 
---- 
-###### Links: 
+***
 
-###### Reference :
+## References
 
+> **Supersedes:** @trace  @
+> **Complements:** @trace  @
+> **Depends On:** @trace  @
+
+***
+
+## PKB References

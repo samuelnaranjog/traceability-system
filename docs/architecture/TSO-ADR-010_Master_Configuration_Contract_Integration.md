@@ -16,13 +16,13 @@ Description: The system requires some rules and categories + single dev environm
 > | Type                | Route                                                                                                                                                                     |
 > | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 > | **📓 Requirements** | [TSO-SREQ-020D\_Self\_Healing Global\_Orchestrator\_&\_Operational\_Contract](<../requirements/TSO-SREQ-020D_Self_Healing Global_Orchestrator_&_Operational_Contract.md>) |
+> | **🛠️ Utility**     | [build-synapse-working-data.util](../../src/core/utils/build-synapse-working-data.util.js)                                                                                |
 >
 > ***
 >
 > # **1. The Context (Systemic Problem)**
 >
 > ## ***Issue***
->
 >
 > ### The already integrated system-config
 >

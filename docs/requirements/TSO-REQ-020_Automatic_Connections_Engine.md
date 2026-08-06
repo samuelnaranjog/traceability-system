@@ -32,11 +32,15 @@ Description: Engine that automatically connects and updates the connections betw
 
 ***
 
-###### Links:
+## References
 
-@trace VS-006 ADR-003 @
+* **Implements:** @trace VS-006 ADR-003 @
+* **Depends On:** @trace @
+* **Parent:** @trace @
 
-###### Reference :
+***
+
+## PKB References
 
 * [[(Literature) Regex expression in Java Script]]
 * [[File handling in Java (visual)]]

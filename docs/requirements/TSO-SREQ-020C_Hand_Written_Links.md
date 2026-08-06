@@ -60,12 +60,14 @@ Description: Enhance the automatic link creation by supporting hand written link
 
 ***
 
+## References
+
+* **Implements:** @trace ADR-009 @
+* **Depends On:** @trace @
+* **Parent:** @trace REQ-020 @
+
 ***
 
-###### Links:
+## PKB References
 
-@trace REQ-020 ADR-009 @
-
-###### Reference :
-
-[[(literature) AST in node.js]]
+* [[(literature) AST in node.js]]
