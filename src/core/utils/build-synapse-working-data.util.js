@@ -14,7 +14,7 @@ function createCategoryLookupMap(ruleDefinitions) {
  * @param {object} validatedConfig - Object passed through a validation schema
  */
 
-// @trace SREQ-020D 
+// @trace SREQ-020D @
 // Implements: ADR-010
 export default function buildSynapseWorkingData(validatedConfig){
 
