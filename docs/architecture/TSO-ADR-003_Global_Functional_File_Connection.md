@@ -151,9 +151,9 @@ Description:
 
 ## References
 
-> **Supersedes:** @trace  @
-> **Complements:** @trace  @
-> **Depends On:** @trace  @
+- **Supersedes:** @trace  @
+- **Complements:** @trace  @
+- **Depends On:** @trace  @
 
 ***
 
