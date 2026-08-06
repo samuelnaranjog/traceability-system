@@ -32,11 +32,17 @@ Description: " Link accessibility nuances"
 >- Only project files will be rendered as links
 > 
 
+---
+## References
 
---- 
-###### Links: 
-@trace ADR-003 @
-###### Reference :
+- **Supersedes:** @trace  @
+- **Complements:** @trace  ADR-003 @
+- **Depends On:** @trace  @
+
+---
+## PKB References
+
+
 
 
 

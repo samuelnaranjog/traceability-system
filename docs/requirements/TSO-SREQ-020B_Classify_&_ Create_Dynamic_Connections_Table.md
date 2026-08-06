@@ -7,10 +7,10 @@ Description: The engine takes the interconnected web and the map of the project 
 
 # Connections
 
-| Type                                | Route                                                                                      |
-| :---------------------------------- | :----------------------------------------------------------------------------------------- |
-| **⚙️ Core Logic (Backend/Systems)** | [TraceabilityPipeline](../../src/core/synapse-engine/TraceabilityPipeline.js)              |
-| **🛠️ Utility**                     | [build-synapse-working-data.util](../../src/core/utils/build-synapse-working-data.util.js) |
+| Type                                | Route                                                                                                                                                            |
+| :---------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **⚙️ Core Logic (Backend/Systems)** | [TraceabilityPipeline](../../src/core/synapse-engine/TraceabilityPipeline.js)                                                                                    |
+| **🛠️ Utility**                     | [build-synapse-working-data.util](../../src/core/utils/build-synapse-working-data.util.js)<br />[serialize-AST.util](../../src/core/utils/serialize-AST.util.js) |
 
 # Acceptance Criteria
 

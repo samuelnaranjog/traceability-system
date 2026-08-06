@@ -18,6 +18,7 @@ import { toString } from 'mdast-util-to-string';
 // Built Methods
 import { findWorkTreePath } from '../git-tree-workflow/GitWorkflowOperations.js';
 import LinkType from '../utils/ResolveLinkType.util.js';
+import { serializeAST } from '../utils/serialize-AST.util.js';
 
 
 class DuplicateArtifact extends Error {
@@ -989,14 +990,7 @@ export default class TraceabilityPipeline{
 
     //@trace SREQ-020B @
     static writeASTConnectionsToArtifact(artifactPath, astTable, connectionRegRule) {
-        const serializeAST = (astNode) => {
-        return String(
-    unified()
-      .use(remarkFrontmatter)
-      .use(remarkGfm)       
-      .use(remarkStringify) 
-      .stringify(astNode)
-  )};
+       
         //console.log(`DEBUG: Receiving in writeASTConnectionsToArtifact :`, {Path: artifactPath, TableToInsert: serializeAST(astTable), sectionRule: connectionRegRule   });
 
         const CONNECTION_REGEX = connectionRegRule;
