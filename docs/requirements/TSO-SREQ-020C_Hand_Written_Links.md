@@ -2,7 +2,7 @@
 Project: TraceabilitySystem
 Status: 4-Done
 Priority:
-Description:
+Description: Enhance the automatic link creation by supporting hand written links that point to external entities. Ensures they aren't wipe out after the engine run.
 ---
 
 # Connections
@@ -30,8 +30,9 @@ Description:
 > 2. The system should preserve the  link url in the proper classification
 > 3. the system should preserve the custom name in the link if present
 > 4. The system should preserve the dynamic connection that point using the keyword
+> 5. The system doesn't creates a duplicate entry into the same category
 
-> [!todo] **Scenario:** Handling hand written links with hand written table & System >1 run
+> [!success] **Scenario:** Handling hand written links with hand written table & System >1 run
 > `Precondition - Action - Outcome`
 >
 > **Given**
@@ -48,7 +49,7 @@ Description:
 > 3. the system should preserve the custom name in the link if present
 > 4. The system should preserve the dynamic connection that point using the keyword
 
-> [!todo] **Scenario:** Handling hand written links that survive in the connection table like prototypes to figma or others
+> [!success] **Scenario:** Handling hand written links that survive in the connection table like prototypes to figma or others
 > `Precondition - Action - Outcome`
 >
 > **Given** The System has collected the files and related them to the specific artifact which they reference , **When** the command `synapse` or the builder make a commit , **Then**
@@ -63,7 +64,7 @@ Description:
 
 ###### Links:
 
-@trace REQ-020 @
+@trace REQ-020 ADR-009 @
 
 ###### Reference :
 

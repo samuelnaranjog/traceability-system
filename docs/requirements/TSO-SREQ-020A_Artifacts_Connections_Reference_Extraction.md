@@ -37,6 +37,7 @@ Description: Scanning the project, extracting file paths and building an Interco
 > 1. The engine extracts data between the keyword using `@trace` and end key char `@` to end the regex extraction
 > 2. The artifact identifiers follow the next patter: a `white space`followed by `uppercase letters` followed by a  hyphen `-` followed by numbers from 0-9 (e.g, `@trace CAD-000 @` ).
 > 3. The engine selects and creates a connection of the file with the reference to the the actual valid **artifact identifiers** ensuring its identifier is in the accepted artifact list (e.g, `REQ`, `ADR`, ..) and is following the patter of artifact Identifier and number (e.g, `REQ-000`, ...)
+> 4. The resulting data never has duplicated references.
 
 > [!success] **Scenario B:** Multiple keyword mentions within a  File complex data extraction
 > `Precondition - Action - Outcome`
@@ -47,6 +48,6 @@ Description: Scanning the project, extracting file paths and building an Interco
 
 ###### Links:
 
-@trace REQ-020 @
+@trace REQ-020 ADR-009@
 
 ###### Reference :

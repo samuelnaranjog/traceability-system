@@ -90,7 +90,7 @@ Later the custom script will update them dynamically without need of manual upda
 
 use <br> to add a new line in the table ^m8MZNdI6
 
-[[TSO-REQ-020_Automatic_Link_Refactor_Script]] ^2f5bYnQg
+[[TSO-REQ-020_Automatic_Connections_Engine]] ^2f5bYnQg
 
 ## Element Links
 De9uq2TR: [[TSO-REQ-018_Analytical_Breakdown#Software template example]]

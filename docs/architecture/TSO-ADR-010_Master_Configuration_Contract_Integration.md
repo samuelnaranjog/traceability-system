@@ -13,10 +13,9 @@ Description: The system requires some rules and categories + single dev environm
 >
 > # *Connections*
 >
-> | Type                        | Route                                                                                                                                                                                                                                                       |
-> | :-------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-> | **📑 Derived Requirements** | [TSO-SREQ-020D\_Self\_Healing Global\_Orchestrator](</Users/s_n_gr/Documents/My-Engineering-projects/tso/req020/docs/architecture/Projects/Traceability_System/docs/requirements/TSO-SREQ-020D_Self_Healing Global_Orchestrator_&_Operational_Contract.md>) |
-> | **📓 Requirements**         | [TSO-SREQ-020D\_Self\_Healing Global\_Orchestrator\_&\_Operational\_Contract](<../requirements/TSO-SREQ-020D_Self_Healing Global_Orchestrator_&_Operational_Contract.md>)                                                                                   |
+> | Type                | Route                                                                                                                                                                     |
+> | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+> | **📓 Requirements** | [TSO-SREQ-020D\_Self\_Healing Global\_Orchestrator\_&\_Operational\_Contract](<../requirements/TSO-SREQ-020D_Self_Healing Global_Orchestrator_&_Operational_Contract.md>) |
 >
 > ***
 >
@@ -24,7 +23,6 @@ Description: The system requires some rules and categories + single dev environm
 >
 > ## ***Issue***
 >
-> \[Describe the high-level, platform-wide bottleneck, infrastructure need, or operational friction that requires a global structural pivot.]
 >
 > ### The already integrated system-config
 >
@@ -242,11 +240,3 @@ Description: The system requires some rules and categories + single dev environm
 > > * *Zero Cognitive Friction:* A reviewer opening a REQ file instantly sees the exact state of the frontend, backend, and testing layers and other useful categories define by the user of the traceability system cleanly separated.
 > >
 > > * *Domain-Agnostic Extensibility:* If the project migrates to Rust or add a Go microservice, not rewriting of the parsing logic is necessary. Simply add `["rs", "go"]` to the `⚙️ Core Logic` array in the configuration contract. The core engine is **completely domain-blind**, allowing it to instantly scale across web development, hardware engineering, or data science repositories without a single code rewrite
-
-***
-
-###### Links:
-
-@trace REQ-023 REQ-020 @
-
-###### Reference :

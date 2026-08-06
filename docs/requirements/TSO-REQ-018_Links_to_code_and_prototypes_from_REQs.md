@@ -1,5 +1,5 @@
 ---
-Status: 4-Done
+Status: 5-Deprecated
 Priority:
 Project: TraceabilitySystem
 Description: Connects REQ's to code and prototypes
@@ -37,5 +37,3 @@ Description: Connects REQ's to code and prototypes
 ###### Links: 
 - [[Connections REQs - ADRs (TSO template)]]
 ###### Reference :
-
-@trace REQ-020 @

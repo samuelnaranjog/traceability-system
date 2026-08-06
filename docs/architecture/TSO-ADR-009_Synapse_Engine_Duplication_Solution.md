@@ -13,10 +13,9 @@ Description: The system when run for the second time with a .synapse-state.json 
 >
 > # *Connections*
 >
-> | Type                                | Route                                                                                                                                                        |
-> | :---------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-> | **⚙️ Core Logic (Backend/Systems)** | [TraceabilityPipeline](../../src/core/synapse-engine/TraceabilityPipeline.js)                                                                                |
-> | **🛠️ Utility**                     | [ResolveLinkType.util](../../src/core/utils/ResolveLinkType.util.js)<br />[path-extraction-helper.util](../../src/core/utils/path-extraction-helper.util.js) |
+> | Type                | Route                                                                                                                                                                                                                                       |
+> | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+> | **📓 Requirements** | [TSO-SREQ-020A\_Artifacts\_Connections\_Reference\_Extraction](../requirements/TSO-SREQ-020A_Artifacts_Connections_Reference_Extraction.md)<br />[TSO-SREQ-020C\_Hand\_Written\_Links](../requirements/TSO-SREQ-020C_Hand_Written_Links.md) |
 >
 > ***
 >
@@ -109,7 +108,5 @@ Description: The system when run for the second time with a .synapse-state.json 
 ***
 
 ###### Links:
-
-@trace REQ-020 @
 
 ###### Reference :

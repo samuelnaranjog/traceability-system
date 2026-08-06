@@ -1,4 +1,3 @@
-// @trace ADR-009 @ 
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -15,7 +14,7 @@ import findFileDataSync from './secureFileDataExtractor.js';
  * @returns {import('../synapse-engine/TraceabilityPipeline').ArtifactRelatedFileConnection} storageStructure - The empty object where the artifacts will map the files that mention them
  */
 
-// @trace SREQ-020A ADR-009 @
+// @trace SREQ-020A @
 export default function ExtractDataAndMatch(itemsObj, regexStart, regexEnd, acceptedIdentifiers, candidateRegex, artifactIdentifierRegex) {
   //console.log(`[Extraction kernel] Accepted artifacts:`, acceptedIdentifiers)
   
@@ -23,6 +22,7 @@ export default function ExtractDataAndMatch(itemsObj, regexStart, regexEnd, acce
   const storageStructure = {};
 
   //Tracks every file path we have already scanned in this run
+  // ADR-009: Ensures no files are scanned twice saving resources and avoiding duplicates
   const processedFilePaths = new Set();
 
   // Regex logic for: Expression extraction & data filtering
@@ -86,6 +86,7 @@ export default function ExtractDataAndMatch(itemsObj, regexStart, regexEnd, acce
 
 
     // Filter accepted artifact identifiers from identifier candidates
+    // ADR-009: Ensures no duplicates are stored for a given artifact
     const filteredUniqueIdentifiers = new Set()
 
     for(const identifier of uniqueIdentifier){

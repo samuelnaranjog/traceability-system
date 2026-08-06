@@ -1,4 +1,4 @@
-// @trace REQ-020 ADR-006 ADR-009 @
+// @trace REQ-020 ADR-006 @
 
 import path from 'node:path';
 import fs, { Dirent, readFileSync } from "node:fs";
@@ -472,7 +472,7 @@ export default class TraceabilityPipeline{
      * @param {string} link 
      * @returns {string} If it was file link returns absolute path. If it was hand type returns unmodified link
      */
-    // @trace ADR-009 @
+    // Resolves ADR-009 duplication
     static evaluateLinkRoute(artifactFilePath, link){
         
         try{
@@ -504,7 +504,7 @@ export default class TraceabilityPipeline{
      * @param {string} artifactFilePath - Absolute path to the artifact to scan
      * @returns {fileLinksMap} A data structure that map links and its type
      */
-    //@trace SREQ-020C ADR-009 @
+    //@trace SREQ-020C @
     static buildFileLinks(artifactFilePath) {
         
         //console.log(`DEBUG: Running buildFileLinks!!!. `) //uncoment to debug 
