@@ -33,7 +33,17 @@ Description:
 | --------------------------------- | ----------------------------------------------------------------------- |
 | 2026-06-13                        | [TSO-REQ-010_Analytical_Breakdown](TSO-REQ-010_Analytical_Breakdown.md) |
 
---- 
-###### Links: 
 
-###### Reference :
+
+---
+
+## References
+
+- **Implements:** @trace @ 
+- **Depends On:** @trace REQ-001 @
+- **Parent:** @trace @
+
+
+---
+
+## PKB References
