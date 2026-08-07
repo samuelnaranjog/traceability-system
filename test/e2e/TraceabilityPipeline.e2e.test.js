@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import os from "os"
 import runTraceabilityPipeline from "../../src/core/synapse-engine/synapse-engine.js";
-import GitWorkflowOperations from "../../src/core/git-tree-workflow/GitWorkflowOperations.js";
+import DevWorkflowOperations from "../../src/core/dev-workflow/DevWorkflowOperations.js";
 import { jest } from '@jest/globals';
 import { MOCK_FILES } from "../utils/project-files-data.mock.js";
 
@@ -21,7 +21,7 @@ let mockRootDir;
        
        // 2. FORCE the Git operations to use the sandbox instead of the real repo
        jest
-         .spyOn(GitWorkflowOperations, "findWorktreePath")
+         .spyOn(DevWorkflowOperations, "findWorktreePath")
          .mockReturnValue(mockRootDir);
    
        // 2. Define the tree structure
@@ -111,7 +111,7 @@ let mockRootDir;
        
        // 2. FORCE the Git operations to use the sandbox instead of the real repo
        jest
-         .spyOn(GitWorkflowOperations, "findWorktreePath")
+         .spyOn(DevWorkflowOperations, "findWorktreePath")
          .mockReturnValue(mockRootDir);
    
        // 2. Define the tree structure

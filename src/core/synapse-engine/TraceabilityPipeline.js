@@ -16,7 +16,7 @@ import { visit } from 'unist-util-visit';
 import { toString } from 'mdast-util-to-string';
 
 // Built Methods
-import { findWorkTreePath } from '../git-tree-workflow/GitWorkflowOperations.js';
+import { findWorkTreePath } from '../dev-workflow/DevWorkflowOperations.js';
 import LinkType from '../utils/ResolveLinkType.util.js';
 import { serializeAST } from '../utils/serialize-AST.util.js';
 

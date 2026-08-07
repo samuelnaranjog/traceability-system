@@ -5,7 +5,7 @@ import os from "os"
 import { jest } from '@jest/globals';
 import ExtractDataAndMatch from "../../src/core/utils/path-extraction-helper.util.js";
 import SearchAndDivide from "../../src/core/utils/FileSelectionHelper.util.js";
-import GitWorkflowOperations from "../../src/core/git-tree-workflow/GitWorkflowOperations.js";
+import DevWorkflowOperations from "../../src/core/dev-workflow/DevWorkflowOperations.js";";
 import { MOCK_FILES } from "../utils/project-files-data.mock.js";
 
 /**@trace SREQ-020A @ */
@@ -21,7 +21,7 @@ const artifactIdPrefix =  /\b[A-Z]+/g; //Global: Regex selects only artifact Ide
        
        // 2. FORCE the Git operations to use the sandbox instead of the real repo
        jest
-         .spyOn(GitWorkflowOperations, "findWorktreePath")
+         .spyOn(DevWorkflowOperations, "findWorktreePath")
          .mockReturnValue(mockRootDir);
    
        // 2. Define the tree structure

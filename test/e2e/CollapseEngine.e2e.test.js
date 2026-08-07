@@ -111,7 +111,7 @@ const mockGitEditor = `node -e "
   const file = process.argv[1];
   fs.writeFileSync(file, '${commitMessage}');
 "`;
-        const scriptPath = path.resolve(import.meta.dirname, '../../src/scripts/git-tree-workflow/CollapseEngine.js')
+        const scriptPath = path.resolve(import.meta.dirname, '../../src/core/dev-workflow/CollapseEngine.js')
         const child = spawn('node', [scriptPath], {
                     cwd: worktreePath,
                     env: {

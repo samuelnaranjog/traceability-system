@@ -1,6 +1,6 @@
 import { MASTER_CONFIG_NAME } from "./system-config.default.util.js";
 import { DEFAULT } from "./system-config.default.util.js";
-import GW from "../git-tree-workflow/GitWorkflowOperations.js";
+import GW from "../dev-workflow/DevWorkflowOperations.js";
 import { readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 

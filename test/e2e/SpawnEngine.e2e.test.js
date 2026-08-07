@@ -79,7 +79,7 @@ describe('Integration test with the most important command flags of the `spawn` 
     })
 
     test('Git Worktree Creation  & Symlink Connection To The Markdown Editor Update', (done) => {
-        const scriptPath = path.resolve(import.meta.dirname, '../../src/scripts/git-tree-workflow/SpawnEngine.js')
+        const scriptPath = path.resolve(import.meta.dirname, '../../src/core/dev-workflow/SpawnEngine.js')
 
         const child = spawn('node', [scriptPath, 'req023', '-s'], {
             cwd: mainRepoPath,
@@ -170,7 +170,7 @@ describe('Integration test with the most important command flags of the `spawn` 
         // Check actual data has been written 
         fs.openSync(configlocation)
 
-        const scriptPath = path.resolve(import.meta.dirname, '../../src/scripts/git-tree-workflow/SpawnEngine.js')
+        const scriptPath = path.resolve(import.meta.dirname, '../../src/core/dev-workflow/SpawnEngine.js')
 
 
         const child = spawn('node', [scriptPath, 'req023', '-c'], {
