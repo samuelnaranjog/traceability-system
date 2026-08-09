@@ -24,7 +24,9 @@
           "ADR"
         ],
         "📓 Requirements": [
-          "REQ", "SREQ", "SSREQ"
+          "REQ",
+          "SREQ",
+          "SSREQ"
         ]
       },
       "extensionCategoryMap": {
@@ -37,11 +39,14 @@
         "🛡️ Verification (Tests & Config)": [
           "test.js"
         ],
-        "🛠️ Utility": ["util.js", "mock.js"] 
+        "🛠️ Utility": [
+          "util.js",
+          "mock.js"
+        ]
       }
     }
   },
   "dev-workflow": {
-    "projectPrefix": ""
+    "projectPrefix": "tso"
   }
 }
