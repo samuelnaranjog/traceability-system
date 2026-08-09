@@ -81,8 +81,8 @@ export function systemSchemaValidation(engineType, systemConfigObj, configName =
     projectPrefix: yup
   .string()
   .trim() 
-  .transform((value) => value?.toUpperCase())
-  .matches(/^[A-Z0-9]{3,5}$/, 'Project prefix must be 3 to 5 uppercase alphanumeric characters')
+  //.transform((value) => value?.toUpperCase())
+  .matches(/^[a-zA-Z0-9]{3,9}$/, 'Project prefix must be 3 to 5 uppercase alphanumeric characters')
   .required('projectPrefix' + CUSTOM_FEEDBACK)
   })
 
@@ -96,7 +96,7 @@ export function systemSchemaValidation(engineType, systemConfigObj, configName =
 
       if(!validatedSynapseConfig) throw new Error("[Synapse] Couldn't get a valid value from the validation schema")
 
-      //console.log('DEBUG: Data to return within systemSchemaValidation is :', validatedSynapseConfig)
+      console.log('DEBUG: Data to return within systemSchemaValidation is :', validatedSynapseConfig)
       return validatedSynapseConfig;
     }
 
@@ -107,7 +107,9 @@ export function systemSchemaValidation(engineType, systemConfigObj, configName =
 
         if(!validatedSpawnConfig) throw new Error("[Spawn] Couldn't get a valid value form the validation schema")
 
-        return validatedSpawnConfig;
+        systemConfigObj[engineType] = validatedSpawnConfig;
+
+        return systemConfigObj;
     }
   }
   catch(err){

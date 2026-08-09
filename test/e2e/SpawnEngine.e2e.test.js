@@ -1,4 +1,4 @@
-// @trace REQ-023 @
+// @trace SREQ-023A @
 import os from 'os';
 import fs from 'fs'
 import { spawn, spawnSync } from 'child_process';
@@ -28,7 +28,9 @@ const getCanonicalPath = (targetPath) => {
     return path.join(existingRealRoot, pathSuffix);
 };
 
-describe('Integration test with the most important command flags of the `spawn` local orchestrator of worktrees', () => {
+
+
+describe('e2e test with the most important command flags of the `spawn` local orchestrator of worktrees', () => {
 
 
     let mainRepoPath;
@@ -78,6 +80,7 @@ describe('Integration test with the most important command flags of the `spawn` 
         
     })
 
+    // @trace SREQ-023C @
     test('Git Worktree Creation  & Symlink Connection To The Markdown Editor Update', (done) => {
         const scriptPath = path.resolve(import.meta.dirname, '../../src/core/dev-workflow/SpawnEngine.js')
 
@@ -102,7 +105,7 @@ describe('Integration test with the most important command flags of the `spawn` 
                 streamBuffer = '';
             }
 
-            if (streamBuffer.includes('What is your project markdownEditorFolderPath')) {
+            if (streamBuffer.includes('What is your project dev-workflow.markdownEditorFolderPath')) {
                 child.stdin.write(`${mdEditor}\n`);
                 streamBuffer = '';
             }
@@ -158,9 +161,8 @@ describe('Integration test with the most important command flags of the `spawn` 
     test('Git Worktree Creation  & VS Code CLI open & Config File Already Created', (done) => {
         // Create the config file to avoid readline.questions
         const configMockData = {
-                    gitWorkTreeScriptConfig:{
-                    markdownEditorFolderPath: mdEditor,
-                    projectPrefix: expectedPrefix      
+                    "dev-workflow":{
+                        projectPrefix: expectedPrefix   
                     }
                     };
 

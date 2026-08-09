@@ -15,7 +15,7 @@ Description: An orchestrator that dictates the flow of the pipeline and helpers 
 
 # Acceptance Criteria
 
-> \[!success\] **Scenario:** System Config Contract `Precondition - Action - Outcome`
+> [!success] **Scenario:** System Config Contract `Precondition - Action - Outcome`
 > `Precondition - Action - Outcome`
 >
 > **Given** the `system-config.json` has been created with a property "synapse-engine", **When** the user modifies subproperties and configures the system to the specifc project needs, **Then** the engine
@@ -24,7 +24,7 @@ Description: An orchestrator that dictates the flow of the pipeline and helpers 
 > 2. Adjust the system to the artifacts, classification guidelines with artifact identifier and extensions
 > 3. Creates a default behavior instruction file if no **system-config** has been added to the project
 
-> \[!success\] **Scenario B:** Self healing global project script `Precondition - Action - Outcome`
+> [!success] **Scenario B:** Self healing global project script `Precondition - Action - Outcome`
 > `Precondition - Action - Outcome`
 >
 > **Given** the utilities and methods are built & a git repository is created on the project root, **When** the user types `synapse` , **Then**

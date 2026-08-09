@@ -12,7 +12,9 @@
 
       "collapse": "./src/core/dev-workflow/CollapseEngine.js",
 
-      "synapse": "./src/core/synapse-engine/synapse-engine.js"
+      "synapse": "./src/core/synapse-engine/synapse-engine.js",
+
+      "sys-save": "./src/scripts/save-system-config.script.js"
 
    },
 

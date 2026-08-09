@@ -12,6 +12,7 @@ class LinkType {
         return /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(link) && !LinkType.isWebLink(link);
     };
 
+
     // Master Gate: Does this bypass the file system entirely?
     static bypassFileSystem = (link) => {
         return (
