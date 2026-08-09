@@ -3,14 +3,47 @@ Project: TraceabilitySystem
 Type: MOC
 Status: 2-Active
 Priority: P0-Critical
-Objective: A deterministic, local-first traceability engine that unifies Docs-as-Code infrastructure, business validation, and technical execution into an automated Single Source of Truth. It eliminates cognitive decay and administrative friction by strictly coupling market-proof metrics to immutable code artifacts via zero-maintenance Dataview radars.
-Repository: https://github.com/samuelnaranjo50/Traceability-System-Obisidian
+Objective: A deterministic, local-first traceability engine that unifies Docs-as-Code infrastructure, business validation, and technical execution into an automated Single Source of Truth. It eliminates cognitive decay and administrative friction by strictly coupling market-proof metrics to immutable code artifacts via 4 core automatization engines.
+Repository: https://github.com/samuelnaranjog/traceability-system
 Prototypes:
-Production:
+Production: https://www.npmjs.com/package/traceability-engine
 ---
 # **Traceability System**
 Update to have the auto refactor script
 ## **🏛️ System Architecture**
+
+### System Overview
+```mermaid
+graph TD
+    subgraph UI ["1. Local Interactive View (Markdown Editor)"]
+        OBS["Vault & MOC Radar"]
+    end
+
+    subgraph OS ["2. OS-Level Symlink Bridge"]
+        SYM["Symlink Connection (vault <-> worktree)"]
+    end
+
+    subgraph Core ["3. Traceability Engines & Interceptor"]
+        SPAWN["Spawn Orchestrator (Worktree Init)"]
+        SYNAPSE["Synapse Graph Compiler & Pre-commit Hook"]
+        COLLAPSE["Collapse Orchestrator (Squash-Rebase)"]
+    end
+
+    subgraph GitLayer ["4. Git Ledger"]
+        LOCAL_DB[(Shared .git Database)]
+        NAVIGATION["Navigable Docs - Pristine surgical history"]
+    end
+
+    %% Connections
+    OBS -.->|OS Symlink| SYM
+    SYM ==> SPAWN
+    SPAWN --> SYNAPSE
+    SYNAPSE -->|Self-Healing Links & dependency injection| LOCAL_DB
+    COLLAPSE -->|Squash-Merge & Cleanup| LOCAL_DB
+    LOCAL_DB ==>|Static tables| NAVIGATION
+```
+
+### Artifacts Architecture
 ```mermaid
 graph LR
 KanPR[Kanban Board Projects] -->  |Status visualization of MOCs| MOC[Maps of Content for the project -MOC-]
@@ -35,6 +68,8 @@ ADRs -.- ADRArtifact[ADR callout & links]
 ADRs -.- |Private Links| Reference[Reference & link to the knowledgge base]
 
 ```
+
+
 
 ## **⚡ Vertical Slicing**
 Feature development connecting layers of the architecture to deliver one fully functional feature end-to-end.
@@ -71,6 +106,9 @@ Feature development connecting layers of the architecture to deliver one fully f
 | 022 | [From_DataView_To_Raw_Table](<./requirements/TSO-REQ-022_From_DataView_To_Raw_Table.md>)                                               | Turn DataView into functional raw markdown table for GitHub and IDE high quality open source navigability through the docs                                                                                                                                                                          |
 | 023 | [Git_Worktree_Set_Up_&_Spawn_Orchestrator](<./requirements/TSO-REQ-023_Git_Worktree_Set_Up_&_Spawn_Orchestrator.md>)                   | This feature provides a system orchestrator initialization engine command with different functionalities trigger by a flag or combination of them that interact with, git worktree creation, symlink connection to your markdown editor folder & the  opening of your IDE for the specific worktree |
 | 024 | [Workflow_Worktree_Closure_&_Collapse_Orchestrator](<./requirements/TSO-REQ-024_Workflow_Worktree_Closure_&_Collapse_Orchestrator.md>) | This feature ensures the git commit history remains clean from wips, and the closure remains frictionless by automating git operations such as path finding, worktree and branch deletion. Leaving the workspace clean and  ready to restart the workflow again for a new update or extra feature.  |
+| 025 | [Synapse_Pre-commit_Hook](<./requirements/TSO-REQ-025_Synapse_Pre-commit_Hook.md>)                                                     |                                                                                                                                                                                                                                                                                                     |
+
+
 
 
 

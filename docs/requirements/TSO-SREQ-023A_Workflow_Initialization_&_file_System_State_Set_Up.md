@@ -40,19 +40,19 @@ Description: The dev-workflow initialization, folder set up, tree creation, syml
 > \*\***Given** the builder wants to work in a new artifact implementation without creating a new symlink maybe for multi concurrent requirement implementation,  config prefix is added, config markdown editor path is present & the command is run from a worktree of the project , **When** decides to start by running the command `spawn <artifact> -c` or `spawn <artifact> --code` e.g: `spawn req025 -c` , **Then** the ***script*** should:
 > **Given**  the builder wants to work in a new artifact implementation without creating a new symlink maybe for multi concurrent requirement implementation,  config prefix is added, config markdown editor path is present  & the command is run form a worktree of the project , **When** decides to start by running the command `spawn <artifact> -c` or `spawn <artifact> --code` e.g: `spawn req025 -c`  , **Then** the ***script*** should:
 >
-> 6. Create a folder with the prefix if not previously created and move the main worktree dir and other worktrees present there
-> 7. Handle the `config-system.json` presence if not handle its creation
-> 8. Create a new worktree with the artifact in lowercase as name and branch to work  within the folder with the project identifier prefix
-> 9. Open a VS code instance
+> 1. Create a folder with the prefix if not previously created and move the main worktree dir and other worktrees present there
+> 2. Handle the `config-system.json` presence if not handle its creation
+> 3. Create a new worktree with the artifact in lowercase as name and branch to work  within the folder with the project identifier prefix
+> 4. Open a VS code instance
 
 > [!success] **Scenario D:** Default only worktree creation folder set up
 > `Precondition - Action - Outcome`
 >
 > **Given**  the builder wants to work in a new artifact implementation without creating a new symlink,  config prefix is added, the command is run form a worktree of the project , **When** decides to start by running the command `spawn <artifact>`  e.g: `spawn req025 `  , **Then** the ***script*** should:
 >
-> 10. Create a folder with the prefix if not previously created and move the main worktree dir and other worktrees present there
-> 11. Handle the `config-system.json` presence if not handle its creation
-> 12. Create a new worktree with the artifact in lowercase as name and branch to work  within the folder with the project identifier prefix
+> 1. Create a folder with the prefix if not previously created and move the main worktree dir and other worktrees present there
+> 2. Handle the `config-system.json` presence if not handle its creation
+> 3. Create a new worktree with the artifact in lowercase as name and branch to work  within the folder with the project identifier prefix
 
 ## Analytical Breakdown
 
