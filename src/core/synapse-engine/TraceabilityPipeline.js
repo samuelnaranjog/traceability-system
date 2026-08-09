@@ -19,6 +19,7 @@ import { toString } from 'mdast-util-to-string';
 import { findWorkTreePath } from '../dev-workflow/DevWorkflowOperations.js';
 import LinkType from '../utils/ResolveLinkType.util.js';
 import { serializeAST } from '../utils/serialize-AST.util.js';
+import findFileDataSync from '../utils/secureFileDataExtractor.js';
 
 
 class DuplicateArtifact extends Error {
@@ -985,7 +986,7 @@ export default class TraceabilityPipeline{
      * @param {string} artifactPath - The path of the artifact to write the connections
      * @param {string} astTable - The AST table object that should be inserted in the file
      * @param {*} connectionRegRule - The title that should be present to render the connection table below it 
-     * @returns {string} updatedFile - The file with its previous content and the updated data, helpful data logic testing
+     * @returns {[pastFile, modifyFile ]}  An arraywith file with its previous content and the updated content, if not modification modifyfile is undefined
      */
 
     //@trace SREQ-020B @
@@ -995,6 +996,8 @@ export default class TraceabilityPipeline{
 
         const CONNECTION_REGEX = connectionRegRule;
 
+
+        const stringFileData = findFileDataSync(artifactPath);
         const fileASTData = this.parseAST(artifactPath);
 
         let headerFound = false;
@@ -1025,6 +1028,8 @@ export default class TraceabilityPipeline{
 
         if (!headerFound) {
             console.log(`⚠️ [Synapse] Skipped connections update for file: ${artifactPath} - No connections header found.`);
+            //@trace REQ-025 @
+            return [stringFileData, undefined]
         }
         else {
             // Update the file data
@@ -1036,10 +1041,11 @@ export default class TraceabilityPipeline{
                 // Deletes AST injected '\' protection char for broken links injection
                 const finalMarkdown = updatedFile
                     .replace(/\\\[!(.*?)\]/g, '[!$1]')
-                    .replace(/\\\[\\\[/g, '[[');;
+                    .replace(/\\\[\\\[/g, '[[');
 
                 fs.writeFileSync(artifactPath, finalMarkdown, 'utf-8');
-                return updatedFile;
+                //@trace REQ-025 @
+                return [stringFileData, updatedFile];
             }
             catch (error) {
                 if (error.code === 'ENOENT') {

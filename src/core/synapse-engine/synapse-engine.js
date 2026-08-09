@@ -14,7 +14,7 @@ import { parseFileAndCatch } from "../utils/parse-file-&-catch.util.js";
 import buildSynapseWorkingData from "../utils/build-synapse-working-data.util.js";
 import { systemSchemaValidation } from "../utils/validate-system-config-schema.util.js";
 import { findWorkTreePath } from '../dev-workflow/DevWorkflowOperations.js';
-
+import { spawnSync } from 'node:child_process';
 
 // The Main Execution Thread
 const ENGINE_NAME = "[Synapse]"
@@ -44,6 +44,8 @@ export default function runTraceabilityPipeline(vaultPath /* Default argument */
 
 
         // Data structures initialization
+        /**@type {Set} - Paths that should staged */
+        const filesToStage = new Set()
 
         /** @type {import("./TraceabilityPipeline.js").DirectoryAndFileMap} */
  
@@ -127,10 +129,16 @@ export default function runTraceabilityPipeline(vaultPath /* Default argument */
             if(identifierNoNum && CONFIG.acceptedSystemArtifacts.includes(identifierNoNum)){
    
                 const connectionMDTable = ts.buildASTMarkdownConnectionTable(currentClassificationMap, currentArtifactPath, CONFIG.fileTitleAvoidExtensionReg );
-                const result = ts.writeASTConnectionsToArtifact(currentArtifactPath, connectionMDTable ,CONFIG.connectionInsertionTitleRegex )
+                const [pastData, result] = ts.writeASTConnectionsToArtifact(currentArtifactPath, connectionMDTable ,CONFIG.connectionInsertionTitleRegex )
                 // console.group(`📄 Markdown Result: ${currentArtifactPath}`);
                 // console.log(result);
                 // console.groupEnd();
+
+                if(!result) continue;
+
+                if(pastData !== result){
+                    filesToStage.add(currentArtifactPath);
+                }
 
             }
             else{
@@ -140,6 +148,21 @@ export default function runTraceabilityPipeline(vaultPath /* Default argument */
 
         // Update the connections .synapse-state.json snapshot
         ts.writeJsonDataToFile(artifactRelatedToFiles, synapsePath);
+        
+        //@trace REQ-025 @
+        filesToStage.add(synapsePath);
+
+        // Staged the files that were modify
+        if (filesToStage.size > 0) {
+            for (const file of filesToStage) {
+                const gitAdd = spawnSync("git", ["add", file], {
+                    cwd: process.cwd(),
+                    encoding: "utf8"
+                });
+            }
+        }
+
+
 
         // Clear data structures after all runned successfully
         Object.keys(dirsAndFileObj).forEach(key => delete dirsAndFileObj[key]);

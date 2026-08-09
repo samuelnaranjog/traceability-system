@@ -46,10 +46,13 @@ export function saveConfigSettings(configName) {
         const stdoutMsg = gitCommit.stdout.toString().trim();
 
         // Treat "nothing to commit" as a warning rather than a system-crashing failure
-        if (
-          stdoutMsg.includes("nothing to commit") ||
-          stderrMsg.includes("nothing to commit")
-        ) {
+        const isNothingToCommit = 
+          stdoutMsg.includes("nothing to commit") || 
+          stderrMsg.includes("nothing to commit") ||
+          stdoutMsg.includes("no changes added to commit") ||
+          stderrMsg.includes("no changes added to commit");
+
+        if (isNothingToCommit) {
           console.warn(
             "⚠️ Git commit skipped: No changes detected in the configuration file.",
           );
@@ -83,7 +86,7 @@ export function createConfigFile(configName = MASTER_CONFIG_NAME) {
 
     try {
       writeFileSync(newFilePath, JSON.stringify(configDefaultData, null, 2));
-      //console.log("File created successfully!");
+      console.log("File created successfully!");
 
       saveConfigSettings(MASTER_CONFIG_NAME);
       return newFilePath;
