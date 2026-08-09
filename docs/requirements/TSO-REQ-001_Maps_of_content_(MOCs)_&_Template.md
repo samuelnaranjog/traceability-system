@@ -6,14 +6,22 @@ Description: The portal that connects the whole project documentation, provides 
 status: 4-Done
 ---
 
+# Connections
+
+| Type                                  | Route                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **📓 Requirements**                   | [TSO-REQ-010\_Properties\_For\_MOC\_Traceability](TSO-REQ-010_Properties_For_MOC_Traceability.md)<br />[TSO-REQ-012\_Properties\_For\_ADR's\_Traceability](TSO-REQ-012_Properties_For_ADR's_Traceability.md)<br />[TSO-REQ-021\_Vertical\_Slicing\_MOC\_Template\_&\_Properties](TSO-REQ-021_Vertical_Slicing_MOC_Template_&_Properties.md)<br />[TSO-REQ-022\_From\_DataView\_To\_Raw\_Table](TSO-REQ-022_From_DataView_To_Raw_Table.md) |
+| **🛡️ Verification (Tests & Config)** | [TraceabilityPipeline.e2e.test](../../test/e2e/TraceabilityPipeline.e2e.test.js)<br />[PathExtractionHelper.unit.test](../../test/unit/PathExtractionHelper.unit.test.js)                                                                                                                                                                                                                                                                 |
+| **🛠️ Utility**                       | [project-files-data.mock](../../test/utils/project-files-data.mock.js)                                                                                                                                                                                                                                                                                                                                                                    |
+| **📂 Other**                          | [MOC note (TSO template)](<../assets/templates/note-templates/MOC note (TSO template).md>)                                                                                                                                                                                                                                                                                                                                                |
+
 ## Story
 
 > [!abstract] User Story
 > `User type - Action - Output`
-
-**As a** Builder,
-**I want to** have a central dashboard from which I can visualize all the REQs & ADRs including the last one created of this also the architecture of the application, and the vertical slicing approach for each collection of features,
-**So that** I can quickly navigate and read through the project elements.
+> **As a** Builder,
+> **I want to** have a central dashboard from which I can visualize all the REQs & ADRs including the last one created of this also the architecture of the application, and the vertical slicing approach for each collection of features,
+> **So that** I can quickly navigate and read through the project elements.
 
 ## Acceptance Criteria
 
@@ -64,6 +72,12 @@ status: 4-Done
 
 ***
 
-###### Links:
+## References
 
-###### Reference :
+* **Implements:** @trace @
+* **Depends On:** @trace @
+* **Parent:** @trace @
+
+***
+
+## PKB References

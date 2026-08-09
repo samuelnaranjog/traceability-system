@@ -6,11 +6,6 @@ Description:
 ---
 ## Connections
 
-| Type                | Route                                                                                                  |
-| ------------------- | ------------------------------------------------------------------------------------------------------ |
-| 📓 **Requirements** | `md` [TSO-REQ-001_Maps_of_content_(MOCs)_&_Template](TSO-REQ-001_Maps_of_content_(MOCs)_&_Template.md) |
-| Others              |                                                                                                        |
-
 ## Story
 
 > [!abstract] User Story
@@ -33,13 +28,12 @@ Description:
 | --------------------------------- | ------------------------------------ |
 | 2026-06-03                        | [[TSO-REQ-012_Analytical_Breakdown]] |
 
+---
+## References
 
---- 
-###### Links: 
+- **Implements:** @trace @ 
+- **Depends On:** @trace REQ-001 @
+- **Parent:** @trace @
 
-###### Reference :
-
-#TraceabilitySystem
-
-dkfhlka lkfdaklhj adkfhklad daklh akldhlk adlfkhla sdfkljhlka dklfhdklja  dlkfhjkla fsdkhjlkaj asdfkjhlkad sadflkhjakl sdfsjhalk adklfhjlkad fdakahjalkdj.  dafhdf ahad dsg GKLHlk dlgkgGJL DAFHLK ADFHFD FDAHF ADDAFH A AD FD DAFHDAHDF FADHA ADFHDAFHAD FADHADFHAD DAFHADFH ADFHAD DFAHADFHD
-Traceability_System_Obisidan
+---
+## PKB References

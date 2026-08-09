@@ -3,15 +3,13 @@ Project: TraceabilitySystem
 State: Complete
 Description: All requirements related with the REQ note, each component
 ---
+
 ## Connections
 
+| Type                | Route                                                                                         |
+| :------------------ | :-------------------------------------------------------------------------------------------- |
+| **📓 Requirements** | [TSO-REQ-003\_Requirements\_Structure](../requirements/TSO-REQ-003_Requirements_Structure.md) |
 
-| Type                | Route                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **📕Architecture**  | `md` [TSO-ADR-003_Global_Functional_File_Connection](TSO-ADR-003_Global_Functional_File_Connection.md) <br>  [ ] Bases Plugin [ ] Bases view                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| 📓 **Requirements** | `md` [TSO-REQ-007_Template_Acceptance_Criteria](../requirements/TSO-REQ-007_Template_Acceptance_Criteria.md)<br>`md` [TSO-REQ-013_Analytical_Breakdown_Artifact](../requirements/TSO-REQ-013_Analytical_Breakdown_Artifact.md)<br>`md` [TSO-REQ-018_Links_to_code_and_prototypes_from_REQs](../requirements/TSO-REQ-018_Links_to_code_and_prototypes_from_REQs.md)<br>`md` [TSO-REQ-006_Template_User_Stories](../requirements/TSO-REQ-006_Template_User_Stories.md)<br>`md` [TSO-REQ-011_Properties_For_Requisite_Traceability](../requirements/TSO-REQ-011_Properties_For_Requisite_Traceability.md)<br>`md` [TSO-REQ-020_Automatic_Link_Refactor_Script](../requirements/TSO-REQ-020_Automatic_Link_Refactor_Script.md) |
-
----
 ## Diagram
 
 ```mermaid
@@ -28,4 +26,3 @@ REQs[REQs] -.- AnalyticalBreakdown[Analytical Breakdown]
 REQs[REQs] -.- |Private Links| Links[Private links & reference to the Knowledge base]
 
 ```
-

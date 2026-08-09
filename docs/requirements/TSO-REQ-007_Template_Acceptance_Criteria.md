@@ -28,12 +28,14 @@ Description:
 | --------------------------------- | ------------------------------------ |
 | 2026-05-29                        | [[TSO-REQ-007_Analytical_Breakdown]] |
 
---- 
-###### Links: 
+---
+## References
 
-- [[Acceptance Criteria (TSO template)]] *-> Artifact of acceptance criteria official template*
-###### Reference :
+- **Implements:** @trace  @ 
+- **Depends On:** @trace @
+- **Parent:** @trace REQ-003 @
 
-#TraceabilitySystem
+---
+## PKB References
 
 - [[(Literature) Creating the Ultimate Traceability system for my own solo dev methodology]]

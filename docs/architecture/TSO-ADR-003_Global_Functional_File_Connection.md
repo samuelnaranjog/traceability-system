@@ -152,7 +152,7 @@ Description:
 ## References
 
 * **Supersedes:** @trace  @
-* **Complements:** @trace  @
+* **Complements:** @trace VS-006  @
 * **Depends On:** @trace  @
 
 ***

@@ -1,8 +1,8 @@
 ---
 Project: TraceabilitySystem
-State: In Process
+State: Approved
 Priority: P0-Critical
-Description: 
+Description:
 ---
 
 > [!info] 🏛️ TSO-ADR-012

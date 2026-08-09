@@ -4,7 +4,7 @@ tags:
   - excalidraw
 ---
 ****==⚠  Switch to EXCALIDRAW VIEW in the MORE OPTIONS menu of this document. ⚠== You can decompress Drawing data with the command palette: 'Decompress current Excalidraw file'. For more info check in plugin settings under 'Saving'
-
+\*\*\*\*==⚠ Switch to EXCALIDRAW VIEW in the MORE OPTIONS menu of this document. ⚠== You can decompress Drawing data with the command palette: 'Decompress current Excalidraw file'. For more info check in plugin settings under 'Saving'
 # Finding root with npm package
 
 ```
@@ -150,7 +150,7 @@ Implement a helper function `PathExtractionHelper.js`  that will take the found 
 Algorithm behavior:
 
 - Loop over all the files of the project
-- Reads the file data an check for a connection mention `@trace REQ-001 @`
+- Reads the file data an check for a connection mention `@trace ` `<REQ-000>` `@`
 - If that artifact exist as a key in the data structure it will append the file, and ensure the already stored connections are not lost
 - Otherwise it will append the first file and create the key
 

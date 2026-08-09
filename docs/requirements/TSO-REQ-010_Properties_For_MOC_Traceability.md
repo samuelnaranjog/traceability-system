@@ -4,14 +4,9 @@ Status: 4-Done
 Priority: P1-High
 Description:
 ---
-## Connections
+# Connections
 
-| Type                | Route                                                                                             |
-| ------------------- | ------------------------------------------------------------------------------------------------- |
-| **📕Architecture**  |                                                                                                   |
-| 📓 **Requirements** | [TSO-REQ-001_Maps_of_content_(MOCs)_&_Template](TSO-REQ-001_Maps_of_content_(MOCs)_&_Template.md) |
-
-## Story
+# Story
 
 >[!abstract] User Story
 > `User type - Action - Output`
@@ -20,9 +15,9 @@ Description:
 **I want to** be able to find and sort all the projects I'm working, have finished or are ready for future implementation ,
 **So that** I can easily go through them in a kanban like board.
 
-## Acceptance Criteria
+# Acceptance Criteria
 
-> [!todo] **Scenario:** Proper insertion with all properties
+> [!success] **Scenario:** Proper insertion with all properties
 > `Precondition - Action - Outcome`
 > 
 > **Given** the builder has created a MOC note, **When** I insert the structure MOC template , **Then** as the first element a collection of predefined properties must have been inserted

@@ -1,6 +1,6 @@
 ---
 Project: TraceabilitySystem
-State: In Process
+State: Approved
 Priority: P0-Critical
 Description: The system requires some rules and categories + single dev environment configurations. I need to find a way to integrate all this together to ensure the system is personalizable and resistant to cross-device sync
 ---
@@ -15,7 +15,7 @@ Description: The system requires some rules and categories + single dev environm
 >
 > | Type                | Route                                                                                                                                                                                                                                                                                                                |
 > | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-> | **📕 Architecture** | [TSO-ADR-012\_Symlink\_Local\_Storage](TSO-ADR-012_Symlink_Local_Storage.md)                                                                                                         |
+> | **📕 Architecture** | [TSO-ADR-012\_Symlink\_Local\_Storage](TSO-ADR-012_Symlink_Local_Storage.md)                                                                                                                                                                                                                                         |
 > | **📓 Requirements** | [TSO-SREQ-020D\_Self\_Healing Global\_Orchestrator\_&\_Operational\_Contract](<../requirements/TSO-SREQ-020D_Self_Healing Global_Orchestrator_&_Operational_Contract.md>)<br />[TSO-SREQ-023C\_Enhance\_Support\_Configuration\_Contracts](../requirements/TSO-SREQ-023C_Enhance_Support_Configuration_Contracts.md) |
 >
 > ***
