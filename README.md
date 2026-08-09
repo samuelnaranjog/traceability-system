@@ -103,7 +103,9 @@ sys-save
 The traceability engine is engineered for both active development and automated safety:
 
 ##### Dual-Mode Execution Architecture
-###### Proactive Sync
+
+###### Proactive Sync
+
 Invoke anytime from the worktree or branch to which you want to build the dependency graph, validate configuration contracts, and bake  MOC radars into static Markdown tables for instant navegavility.
 
 **Command**
@@ -111,7 +113,8 @@ Invoke anytime from the worktree or branch to which you want to build the depend
 synapse
 ````
 ###### Reactive Gatekeeping (`git commit`)
- Operates transparently via Git hooks as a deterministic safety barrier, auto-healing relative file paths and enforcing trace invariants before a commit seals.
+
+Operates transparently via Git hooks as a deterministic safety barrier, auto-healing relative file paths and enforcing trace invariants before a commit seals.
 
 To enable it you must set up the pre-commit hook by running in any of the worktrees:
 ````bash
