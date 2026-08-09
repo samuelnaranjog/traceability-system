@@ -23,7 +23,6 @@ Description:
 >
 > ## ***Issue***
 >
->
 > ## The cross device sync problem
 >
 > Within this json the is a specific property that causes problems if set for all branches and devices
@@ -45,7 +44,6 @@ Description:
 > ### ==Local variable md editor path storage==
 >
 > All worktrees share a same `.git/config` that is local and own to each project, the system could stop depending in `"markdownEditorFolderPath"` within the `system-config.json` and instead relying only in the **git config** which is local and enable `system-config.json` to be store within the git history and shared across devices ensuring **Traceability System** consistency across all project branches trees and devices.
->
 >
 > ## **3. The Consequences (Architectural Impact)**
 >
