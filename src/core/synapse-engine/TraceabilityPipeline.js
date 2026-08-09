@@ -158,19 +158,19 @@ export default class TraceabilityPipeline{
                  */
                 const analyticalBreakdownReg = /Analytical_Breakdown(?:_?\d+)?(?:\.md)?$/i;
                 //console.log(`Telemetrics: comparison for ${fileNameInTitle} evalutes to : ${analyticalBreakdownReg.test(fileNameInTitle)}`);
+                const isAnalyticalBreakdown = analyticalBreakdownReg.test(fileNameInTitle)
+                if (isAnalyticalBreakdown) return; 
+                //console.log(`Telemetrics: comparison for ${fileNameInTitle} evalutes to : ${analyticalBreakdownReg.test(fileNameInTitle)}`);
 
-                if (artifactInTitle) {
-                    if (artifactInTitle && analyticalBreakdownReg.test(fileNameInTitle)) return; // Skips the current file
-                    //console.log(`[TELEMETRY] Comparing ${artifact} == ${artifactInTitle} for ${file.name}` );
-
-                    if (artifact == artifactInTitle && (!analyticalBreakdownReg.test(fileNameInTitle))) {
+             
+                if (artifact && artifact === artifactInTitle ) {
                         //console.log(`[TELEMETRY] Comparing ${artifact} == ${artifactInTitle} for ${file.name}` );
 
                         //Build a valid system resistant path
-                        const resolvedPath = path.join(file.path, file.name)
-                        validArtifactPath.add(resolvedPath)
-                    }
+                    const resolvedPath = path.join(file.path, file.name)
+                    validArtifactPath.add(resolvedPath)
                 }
+                
 
             })
             //console.log(`[TELEMETRY] Target: ${artifact} | Set Size: ${validArtifactPath.size} | Paths:`, [...validArtifactPath])

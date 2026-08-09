@@ -13,7 +13,7 @@ import { validateConfigPresence } from "../utils/config-file-operations.util.js"
 import { parseFileAndCatch } from "../utils/parse-file-&-catch.util.js";
 import buildSynapseWorkingData from "../utils/build-synapse-working-data.util.js";
 import { systemSchemaValidation } from "../utils/validate-system-config-schema.util.js";
-import { findWorkTreePath } from "../dev-workflow/DevWorkflowOperations";
+import { findWorkTreePath } from '../dev-workflow/DevWorkflowOperations.js';
 
 
 // The Main Execution Thread
