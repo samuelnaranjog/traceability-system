@@ -1,12 +1,12 @@
-// @trace SREQ-023C @
+// @trace SREQ-023C SREQ-024B @
 import {spawnSync } from "node:child_process";
 import LinkType from "./ResolveLinkType.util.js";
 import { stdin as input, stdout as output } from 'process';
 import { createInterface } from "node:readline/promises";
 
 /**
-    * @param {string} key 
-    
+ * @param {string} parentKey - The key within the git config
+ * @param {string} key - Section where you want to set the value
  */
 
 
@@ -52,8 +52,9 @@ export async function setCustomGitConfig(parentKey, key) {
 }
 
 /**
- * @param {string} key - key value to access from the git config
- * @returns {string} Absolute path of symlink folder
+ * @param {string} parentKey - The key within the git config
+ * @param {string} key - section value to access from the git config
+ * @returns {string}  Absolute path of symlink folder
  */
 
 // Implements: ADR-012

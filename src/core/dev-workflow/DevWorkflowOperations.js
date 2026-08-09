@@ -715,6 +715,7 @@ static async setUpPropertiesOfConfig(property, engineType, absolutePath) {
    * @description Should be run directly from the worktree or use a custom cwd in the arguments
    * @param {path} customPath - Allows you to set a custom path for the operation, fallback to current cwd 
    */
+  //@trace SREQ-024A @
   static rebaseSquash(cwd = process.cwd(), targetBranch = 'main'){
 
     try{
@@ -765,6 +766,7 @@ static async setUpPropertiesOfConfig(property, engineType, absolutePath) {
  * @param {path} cwd - Allows you to set a custom path for the operation, fallback to current cwd 
  * @returns {string} Current checkout branch
  */
+//@trace SREQ-024A @
 static currentBranchName(cwd = process.cwd()){
   try{
     const branch = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'],{
@@ -794,6 +796,7 @@ static currentBranchName(cwd = process.cwd()){
  * @param {path} cwd - The path of main, fallback current cwd
  * @param {string} branch - The name of the branch which will be merged
  */
+//@trace SREQ-024A @
 static mergeOperation(cwd = process.cwd(), branch){
   try{
     const merge = spawnSync('git', ['merge', '--ff-only', branch],{
@@ -852,6 +855,7 @@ static mergeOperation(cwd = process.cwd(), branch){
    * @param {path} [cwd=process.cwd()] cwd - The path of main or worktree that doenst have checkout the branch to delete, fallback current cwd
    * @param {string} branchName - The name of the branch to delete
    */
+  //@trace SREQ-024A @
   static removeBranch(cwd = process.cwd(), branchName){
     try{
 

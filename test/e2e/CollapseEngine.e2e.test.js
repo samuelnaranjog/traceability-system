@@ -1,4 +1,4 @@
-// @trace REQ-024 @
+// @trace SREQ-024A @
 import fs from 'node:fs';
 import path, { basename } from 'node:path';
 import os from 'node:os';
@@ -124,10 +124,17 @@ const mockGitEditor = `node -e "
 
         
         let errorOutput = '';
+        let streamBuffer = '';
 
         child.stdout.on('data', (data) => {
             const text = data.toString();
             console.log(`CHILD LOG: ${text}`);
+            streamBuffer += text
+
+            if (streamBuffer.includes('What is your project dev-workflow.markdownEditorFolderPath')) {
+                child.stdin.write(`${mdEditor}\n`);
+                streamBuffer = '';
+            }
             
         });
 

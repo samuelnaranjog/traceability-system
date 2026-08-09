@@ -96,7 +96,7 @@ export function systemSchemaValidation(engineType, systemConfigObj, configName =
 
       if(!validatedSynapseConfig) throw new Error("[Synapse] Couldn't get a valid value from the validation schema")
 
-      console.log('DEBUG: Data to return within systemSchemaValidation is :', validatedSynapseConfig)
+      //console.log('DEBUG: Data to return within systemSchemaValidation is :', validatedSynapseConfig)
       return validatedSynapseConfig;
     }
 

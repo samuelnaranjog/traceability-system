@@ -13,9 +13,9 @@ Description:
 >
 > # *Connections*
 >
-> | Type                | Route                                                                                                                                 |
-> | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------ |
-> | **📓 Requirements** | [TSO-SREQ-023C\_Enhance\_Support\_Configuration\_Contracts](../requirements/TSO-SREQ-023C_Enhance_Support_Configuration_Contracts.md) |
+> | Type                | Route                                                                                                                                                                                                                                                                                   |
+> | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+> | **📓 Requirements** | [TSO-SREQ-023C\_Enhance\_Support\_Configuration\_Contracts](../requirements/TSO-SREQ-023C_Enhance_Support_Configuration_Contracts.md)<br />[TSO-SREQ-024B\_Enhance\_Support\_Git\_configuration\_Contract](../requirements/TSO-SREQ-024B_Enhance_Support_Git_configuration_Contract.md) |
 >
 > ***
 >
@@ -23,7 +23,6 @@ Description:
 >
 > ## ***Issue***
 >
-> \[Describe the high-level, platform-wide bottleneck, infrastructure need, or operational friction that requires a global structural pivot.]
 >
 > ## The cross device sync problem
 >
@@ -47,30 +46,12 @@ Description:
 >
 > All worktrees share a same `.git/config` that is local and own to each project, the system could stop depending in `"markdownEditorFolderPath"` within the `system-config.json` and instead relying only in the **git config** which is local and enable `system-config.json` to be store within the git history and shared across devices ensuring **Traceability System** consistency across all project branches trees and devices.
 >
-> ### ==Local variable md editor path storage==
->
-> All worktrees share a same `.git/config` that is local and own to each project, the system could stop depending in `"markdownEditorFolderPath"` within the `system-config.json` and instead relying only in the **git config** which is local and enable `system-config.json` to be store within the git history and shared across devices ensuring **Traceability System** consistency across all project branches trees and devices.
->
-> \[State the exact system-wide rule, technology, or framework methodology being mandated across the entire ecosystem.]
->
-> ##
->
-> The spawn engine must separate concerns:
-> \[e.g., Requires modifcation accros REQ-002 and REQ-003. Also the state flow of ADR-010 should be modify]
-> The spawn engine must separate concerns:
->
-> * Extract the project prefix for the set up & worktree creation from the configuration contract
->
-> ## *Positive Effects*
->
-> * Extract the sysmlink target of the md editor from the git config
->   \[e.g., Eliminates artifact fragmentation across the SDLC.]
 >
 > ## **3. The Consequences (Architectural Impact)**
 >
 > ## *Impact*
 >
-> * Requires modification across REQ-023 implement utility functions that interact with the git config to ensure the md editor target path is added properly and validate its presence
+> * Requires modification across REQ-023 & REQ-024 implement utility functions that interact with the git config to ensure the md editor target path is added properly and validate its presence
 > * Requires the inclusion of an util that commit the project prefix when added through the CLI.
 >
 > ## *Positive Effects*

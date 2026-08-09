@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-
-// @trace REQ-024 @
+// @trace SREQ-024A @
 
 import GWO from "./DevWorkflowOperations.js";
+import {createConfigFile, setUpPropertiesOfConfig, accessPropertiesOfConfig, validateConfigPresence} from "../utils/config-file-operations.util.js"
+import { accessGitConfigSymValue, setCustomGitConfig } from "../utils/git-config-operations.util.js"
 
-const configName = "system-config.json"
+const ENGINE_TYPE = "dev-workflow";
 
 GWO.rebaseSquash();
 
@@ -28,23 +29,12 @@ GWO.mergeOperation(undefined, branchName);
 // Detach active reference of the symlink and back to main worktree 
 // (guaranties a clean markdown editor with the right connection)
 
-let [isConfig, configPath] = GWO.validateConfigPresence(configName);
-
-if(!isConfig){
-    configPath = GWO.createConfigFile(configName);
-    console.log(`DEBUG: Created config file path: ${configPath}`)//uncoment to debug
-    await GWO.setUpPropertiesOfConfig("projectPrefix", configPath)
-}
-else{
-    console.log(`DEBUG: This is the config file path which is indeed found ${configPath}`)//to debug uncoment
-    // Validate the prefix is exist & if not add the data
-    await GWO.setUpPropertiesOfConfig("projectPrefix", configPath)
-}
-
 // Ensure the path exist, or prompt for it.
-await GWO.setUpPropertiesOfConfig('markdownEditorFolderPath', configPath);
+// @trace SREQ-024B @
+// Implements: ADR-012
+await setCustomGitConfig(ENGINE_TYPE, 'markdownEditorFolderPath');
+const markdownEditorPath = accessGitConfigSymValue(ENGINE_TYPE, 'markdownEditorFolderPath')
 
-const markdownEditorPath = GWO.accessPropertiesOfConfig('markdownEditorFolderPath', configPath)
 
 GWO.updateSymlink(markdownEditorPath, mainCWD);
 
