@@ -4,7 +4,7 @@
 
    "version": "1.0.0",
 
-   "description": "My custom cross-device script",
+   "description": " A deterministic, local-first traceability engine that unifies Docs-as-Code infrastructure, business validation, and technical execution into an automated Single Source of Truth.",
 
    "bin": {
 
@@ -26,7 +26,7 @@
 
    "author": "Your Name",
 
-   "license": "ISC",
+   "license": "Apache-2.0",
 
    "type": "module",
 
