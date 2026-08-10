@@ -93,7 +93,7 @@ export default function runTraceabilityPipeline(vaultPath /* Default argument */
 
             //console.log(`DEBUG: artifact being searched ${artifact}`) //uncoment to debug
             const currentArtifactPath = ts.findArtifactFile(artifact, dirsAndFileObj.files, CONFIG.fileTitleIdentifierFilteringRegex, CONFIG.fileNameFilterRegex )
-            //console.log(`DEBUG: Path of artifact being returned: ${currentArtifactPath}`) //uncoment to debug
+            console.log(`DEBUG: Path of artifact being returned: ${currentArtifactPath}`) //uncoment to debug
 
             // Handle the "3 side comparison" leveraging past, current and present state:
             // - Extract the 3 states for the current artifact
@@ -111,13 +111,13 @@ export default function runTraceabilityPipeline(vaultPath /* Default argument */
             //console.log(`DEBUG: Referential File links from 'currentRefsLinks' being returned: ${JSON.stringify([...currentRefsLinks])}. `) //uncoment to debug
             
             ts.classifyAndConquerHard(currentClassificationMap,fileLinksWithType, pastRefsLinks, currentRefsLinks)
-
+            console.log('Current mutated categorized data', currentClassificationMap)
             // Access the artifact connections in current state, classify them and ensure no duplicates are added
 
             //console.log(`DEBUG: Relations being passed a siterable: ${JSON.stringify(artifactRelatedToFiles[artifact])}. `) //uncoment to debug
             ts.classifyAndConquerDynamic(currentClassificationMap, artifactRelatedToFiles[artifact], CONFIG.classificationGuidelines, CONFIG.fileIdentifierNoNumFilteringRegex, CONFIG.fileExtensionExtractionRegex, CONFIG.acceptedSystemArtifacts)
             //console.log(`DEBUG: Classification Result of the Whole data: ${JSON.stringify(Object.fromEntries(currentClassificationMap))}. `) //uncoment to debug --> showS!!!!
-            
+            console.log('Current mutated categorized data no hard link', currentClassificationMap)
 
             // Build a markdown table:
             //  - Extract the artifact identifier e.g: "REQ" from the current format "REQ-000"

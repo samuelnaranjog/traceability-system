@@ -168,7 +168,9 @@ export default class TraceabilityPipeline{
                         //console.log(`[TELEMETRY] Comparing ${artifact} == ${artifactInTitle} for ${file.name}` );
 
                         //Build a valid system resistant path
-                    const resolvedPath = path.join(file.path, file.name)
+                    
+                    const resolvedPath = path.join(file.parentPath, file.name)
+                    
                     validArtifactPath.add(resolvedPath)
                 }
                 
@@ -325,7 +327,7 @@ export default class TraceabilityPipeline{
                  */
                 // Find the relative path from artifact to the connected file
                 const artifactDir = path.dirname(artifactPath)
-                const relativeFilePath = path.relative(artifactDir, fileObj.path);
+                const relativeFilePath = path.relative(artifactDir, fileObj.parentPath);
 
                 const nameWithoutExtension = fileObj.name.match(fileAvoidExtensionReg)?.[0];
 
@@ -596,7 +598,7 @@ export default class TraceabilityPipeline{
         const fileObj = data[artifactName];
         const linksSet = new Set()
         for(const file of fileObj){
-            linksSet.add(file.path)
+            linksSet.add(file.parentPath)
         }
         return linksSet
     }
@@ -731,7 +733,7 @@ export default class TraceabilityPipeline{
               const singleCategory = [...classification][0];
 
              //console.log('DEBUG: *ClassifyAndConquerDynamic* about to add:', { file: file.name, artifactIdentifier, extension, tag: singleCategory });  // uncoment to debug
-
+              console.log('current file to add:', file)
               if(currentClassificationMap.get(singleCategory)){
                     currentClassificationMap.get(singleCategory).push({"link": file.path, "linkName": FALLBACK_LINK_NAME, "isHand": false  })
                 }
@@ -842,6 +844,7 @@ export default class TraceabilityPipeline{
         try {
 
             const artifactDir = path.dirname(artifactPath);
+            console.log("DEBUG: Artifact dir path:", artifactDir)
 
             const dynamicTable = {
                 type: 'table',
@@ -872,7 +875,7 @@ export default class TraceabilityPipeline{
 
 
             // where the iretation starts Object.entries(categorizedData)
-            //console.log(`DEBUG: The iterable array: ${JSON.stringify(Array.from(categorizedData.entries()))}, Once sort ; ${JSON.stringify(mapEntries)}. `) //uncoment to debug
+            console.log(`DEBUG: The iterable array: ${JSON.stringify(Array.from(categorizedData.entries()))}, Once sort ; ${JSON.stringify(mapEntries)}. `) //uncoment to debug
 
             // Table To insert
             for (const [key, arrayOfUrls] of categorizedData) {
@@ -918,7 +921,7 @@ export default class TraceabilityPipeline{
                 arrayOfUrls.forEach(url => {
                     
 
-                    //console.log(`DEBUG: within for each of buildASTMarkdownConnectionTable, iterating over : ${JSON.stringify(url)}. `) //uncoment to debug
+                    console.log(`DEBUG: within for each of buildASTMarkdownConnectionTable, iterating over : `, url) //uncoment to debug
                     let newLink;
 
                     // Determine if hand or dynamic 
@@ -933,9 +936,11 @@ export default class TraceabilityPipeline{
                         }
                     }else if(!url.isHand){
                         // Find the relative path from artifact to the connected file
+                        console.log(`DEBUG about to perfrom relative from  ${artifactDir} to ${url.link} in the url object:`, url)
                         const relativeFilePath = path.relative(artifactDir, url.link);
-                        const nameWithoutExtension = path.basename(url.link).match(fileAvoidExtensionReg)?.[0] || path.basename(url.link);
+                        const nameWithoutExtension = path.basename(url.link).match(fileAvoidExtensionReg)?.[0] || path.basename(url.linkName);
                         
+                        console.log('DEBUG: extracted name:' ,nameWithoutExtension)
                         newLink = {
                             "type": "link",
                             "url": `${relativeFilePath}`,

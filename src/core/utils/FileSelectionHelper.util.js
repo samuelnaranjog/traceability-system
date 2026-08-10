@@ -39,7 +39,7 @@ export default function SearchAndDivide(folderPath, excludeList, dirsAndFilesObj
     */
 
     const currentFolderLocation = dirsAndFilesObj.dirs.findIndex(
-      (dir) => path.join(dir.path, dir.name) === folderPath, //Checks if the item is actually the scanned directory and figure out its index!
+      (dir) => path.join(dir.parentPath, dir.name) === folderPath, //Checks if the item is actually the scanned directory and figure out its index!
     ); // Breaks once true returning the index of that elements otherwise -1
 
     //console.log("Index of found element: ", currentFolderLocation);
@@ -56,7 +56,7 @@ export default function SearchAndDivide(folderPath, excludeList, dirsAndFilesObj
     if (dirsAndFilesObj.dirs.length > 0) {
       dirsAndFilesObj.dirs.forEach((dir) => {
         SearchAndDivide(
-          path.join(dir.path, dir.name),
+          path.join(dir.parentPath, dir.name),
           excludeList,
           dirsAndFilesObj,
         );
