@@ -598,7 +598,7 @@ export default class TraceabilityPipeline{
         const fileObj = data[artifactName];
         const linksSet = new Set()
         for(const file of fileObj){
-            linksSet.add(file.parentPath)
+            linksSet.add(file.path)
         }
         return linksSet
     }

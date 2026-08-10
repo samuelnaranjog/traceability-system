@@ -130,9 +130,9 @@ export default function runTraceabilityPipeline(vaultPath /* Default argument */
    
                 const connectionMDTable = ts.buildASTMarkdownConnectionTable(currentClassificationMap, currentArtifactPath, CONFIG.fileTitleAvoidExtensionReg );
                 const [pastData, result] = ts.writeASTConnectionsToArtifact(currentArtifactPath, connectionMDTable ,CONFIG.connectionInsertionTitleRegex )
-                // console.group(`📄 Markdown Result: ${currentArtifactPath}`);
-                // console.log(result);
-                // console.groupEnd();
+                console.group(`📄 Markdown Result: ${currentArtifactPath}`);
+                console.log(result);
+                console.groupEnd();
 
                 if(!result) continue;
 
