@@ -547,7 +547,7 @@ export default class DevWorkflowOperations {
 
     if (configFile) {
       hasConfig = true;
-      foundPath = path.join(configFile.path, configName);
+      foundPath = path.join(configFile.parentPath, configName);
     } else {
       hasConfig = false;
     }

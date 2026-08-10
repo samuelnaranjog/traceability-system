@@ -111,7 +111,7 @@ export default function runTraceabilityPipeline(vaultPath /* Default argument */
             //console.log(`DEBUG: Referential File links from 'currentRefsLinks' being returned: ${JSON.stringify([...currentRefsLinks])}. `) //uncoment to debug
             
             ts.classifyAndConquerHard(currentClassificationMap,fileLinksWithType, pastRefsLinks, currentRefsLinks)
-
+            
             // Access the artifact connections in current state, classify them and ensure no duplicates are added
 
             //console.log(`DEBUG: Relations being passed a siterable: ${JSON.stringify(artifactRelatedToFiles[artifact])}. `) //uncoment to debug

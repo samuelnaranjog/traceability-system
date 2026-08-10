@@ -34,7 +34,7 @@ export default function ExtractDataAndMatch(itemsObj, regexStart, regexEnd, acce
 
     
 
-    const fullPath = path.join(file.path, file.name);
+    const fullPath = path.join(file.parentPath, file.name);
 
     if(processedFilePaths.has(fullPath)) return;
 
